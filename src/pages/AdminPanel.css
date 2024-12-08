@@ -1,0 +1,61 @@
+.admin-panel {
+    display: flex;
+    height: 100vh;
+    background-color: #f4ccb6;
+  }
+  
+  .admin-panel .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #FFDBB5;
+    padding: 10px 20px;
+    border-bottom: 1px solid #FFDBB5;
+    width: 100%;
+  }
+  
+  
+  .admin-panel .header .settings-icon {
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 1260px; /* Ayarlar butonu sağa taşındı */
+  }
+  
+  .admin-panel .sidebar {
+    background-color: #d4a377;
+    width: 200px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .admin-panel .sidebar .menu-item {
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  
+  .admin-panel .sidebar .menu-item:not(:last-child) {
+    margin-bottom: 990px; /* Menü elemanları arasında daha geniş boşluk */
+  }
+  
+  .admin-panel .content {
+    flex: 1;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+  }
+  
+  .admin-panel .content .box {
+    background-color: #FFDBB5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    text-align: center;
+    min-height: 200px;
+  }
+  

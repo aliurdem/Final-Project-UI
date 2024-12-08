@@ -1,0 +1,70 @@
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px 20px;
+    background-color: #493628;
+    color: white;
+  }
+  
+  .footer-left {
+    flex: 1;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    font-style: italic;
+  }
+  
+  .footer-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .footer-center ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .footer-center li {
+    margin: 10px 0;
+    font-size: 1.2rem;
+  }
+  
+  .footer-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: -50px;
+    margin-left: 10px;
+
+  }
+  
+  .footer-right h3 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+  }
+  
+  .social-icons {
+    display: flex;
+    gap: 70px; /* İkonlar arasına 20px boşluk ekleyin */
+  }
+  
+  .icon {
+    width: 150px; /* İkon genişliğini artırın */
+    height: 150px; /* İkon yüksekliğini artırın */
+    border-radius: 50%;
+    background-color: #B99470;
+    padding: 8px; /* İkonun içindeki boşluğu artırmak için padding değeri */
+    object-fit: contain;
+  }
+  
+  .social-icons img.icon {
+    width: 60px; /* İstediğiniz boyuta göre ayarlayın */
+    height: 60px;
+  }
+  

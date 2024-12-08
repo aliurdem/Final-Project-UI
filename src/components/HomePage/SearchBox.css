@@ -1,0 +1,14 @@
+.custom-input::placeholder {
+  color: black; /* Placeholder rengini beyaz yapar */
+  font-style: italic; /* Placeholder için eğik yazı tipi */
+}
+
+.custom-input {
+  color: white; /* Girilen metnin rengini beyaz yapar */
+  font-size: 16px; /* Yazı tipinin boyutunu biraz artırdık */
+}
+
+.custom-input:focus {
+  border-color: #6f4f32; /* Input odaklanınca kenar rengini değiştirelim */
+  box-shadow: 0 0 5px rgba(79, 79, 79, 0.5); /* Odaklanınca hafif bir gölge ekleyelim */
+}

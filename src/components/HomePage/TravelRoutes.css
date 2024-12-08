@@ -1,0 +1,62 @@
+.travel-routes {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Üst hizalamak için */
+  padding: 20px;
+  background-color: #AB886D;
+}
+
+.route-left .main-image {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+}
+
+.route-right {
+  flex: 1;
+  padding-left: 20px; /* Sağdaki grubun sola kayması için azaltıldı */
+  margin-top: -20px; /* Grubu biraz yukarı çekmek için eklendi */
+}
+
+.route-right h2 {
+  font-size: 2rem;
+  margin-bottom: 10px; /* Başlığın görsellere yaklaşması için azaltıldı */
+}
+
+.route-images {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-start; /* Görselleri biraz sola kaydırmak için */
+}
+
+.route-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-left: 20px;
+}
+
+.route-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  font-style: italic;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  margin-bottom: 10px;
+}
+
+.route-image {
+  max-width: 200px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.main-video {
+  width: 100%; /* Videoyu tam genişlikte gösterir */
+  height: auto; /* Oranını korur */
+  border-radius: 8px; /* İsteğe bağlı: Kenarları yuvarlatır */
+  object-fit: cover; /* Video oranını koruyarak kapsayıcıya sığdırır */
+  margin-top: 55px; /* Videoyu aşağıya almak için üst boşluk ekleyin */
+
+}
