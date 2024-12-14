@@ -1,92 +1,121 @@
-import React, { useState } from 'react';
-import { Row, Col, Card, Button, Select, Checkbox, Typography, Radio, InputNumber, message } from 'antd';
-import { PlusOutlined, ArrowLeftOutlined } from '@ant-design/icons'; // Geri ok ikonu
-import { useNavigate } from 'react-router-dom'; // React Router'ı import et
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Card, Button, Select, Checkbox, Typography, Radio, InputNumber, Input, Upload, message } from 'antd';
+import { PlusOutlined, ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const NewRoutes = () => {
-  const navigate = useNavigate(); // useNavigate hook'u ile yönlendirme yapılacak
+  const navigate = useNavigate();
   const [selectionType, setSelectionType] = useState(null);
   const [routeType, setRouteType] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [places, setPlaces] = useState([]);
+  const [filteredPlaces, setFilteredPlaces] = useState([]);
   const [selectedPlaces, setSelectedPlaces] = useState([]);
-  const [duration, setDuration] = useState(null); // Yeni saat bilgisi state'i
+  const [duration, setDuration] = useState(null);
+  const [userId, setUserId] = useState('');
+  const [uploadedImage, setUploadedImage] = useState(null);
 
-  // Kullanıcı bilgileri
-  const [user, setUser] = useState({
-    username: 'Hatice Kartal',
-    avatarUrl: './avatar.png', // Base64 formatına dönüştürülmesi gerekiyor
-  });
+  useEffect(() => {
+    // Kategorileri yükleme
+    fetch('https://localhost:7263/Category/GetAll')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setCategories(data.data);
+        } else {
+          message.error('Kategoriler yüklenirken bir hata oluştu.');
+        }
+      })
+      .catch(() => {
+        message.error('Kategorileri yükleme sırasında bir hata oluştu.');
+      });
 
-  const popularPlaces = [
-    { id: 1, name: 'Selimiye Camii', category: 'tarihi', favorite: true },
-    { id: 2, name: 'Meriç Köprüsü', category: 'doğa', favorite: false },
-    { id: 3, name: 'Karaağaç', category: 'kültürel', favorite: true },
-    { id: 4, name: 'Edirne Müzesi', category: 'tarihi', favorite: true },
-    { id: 5, name: 'Saray Mutfağı Restoran', category: 'yemek', favorite: false }
-  ];
+    // Yerleri yükleme
+    fetch('https://localhost:7263/Place/GetAll')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setPlaces(data.data);
+        } else {
+          message.error('Yerler yüklenirken bir hata oluştu.');
+        }
+      })
+      .catch(() => {
+        message.error('Yerleri yükleme sırasında bir hata oluştu.');
+      });
+  }, []);
 
-  const routeCategories = [
-    { value: 'tarihi', label: 'Tarih Rotası' },
-    { value: 'yemek', label: 'Yemek Rotası' },
-    { value: 'doğa', label: 'Doğa Rotası' },
-    { value: 'etkinlik', label: 'Etkinlik Rotası' },
-    { value: 'karışık', label: 'Karışık Rota' }
-  ];
+  useEffect(() => {
+    // Filtreleme, seçilen kategoriye göre yerleri gösterir
+    if (routeType) {
+      setFilteredPlaces(
+        places.filter((place) =>
+          selectionType === 'all'
+            ? true
+            : selectionType === 'favorite'
+            ? place.favorite // Eğer favoriler özelliği varsa burada kontrol edilir
+            : true
+        )
+      );
+    } else {
+      setFilteredPlaces(places);
+    }
+  }, [routeType, places, selectionType]);
 
   const handleSelectionTypeChange = (e) => {
     const value = e.target.value;
     setSelectionType(value);
-
-    if (value === 'favorite') {
-      const favoritePlaces = popularPlaces.filter(place => place.favorite);
-      setSelectedPlaces(favoritePlaces);
-    } else {
-      setSelectedPlaces([]);
-    }
+    setSelectedPlaces([]);
   };
 
   const handleRouteTypeChange = (value) => {
     setRouteType(value);
-    if (value !== 'karışık' && selectionType === 'favorite') {
-      const filteredPlaces = popularPlaces.filter(place =>
-        place.category === value && place.favorite
-      );
-      setSelectedPlaces(filteredPlaces);
-    }
+    setSelectedPlaces([]);
   };
 
   const togglePlaceSelection = (place) => {
-    setSelectedPlaces(current =>
+    setSelectedPlaces((current) =>
       current.includes(place)
-        ? current.filter(p => p.id !== place.id)
+        ? current.filter((p) => p.id !== place.id)
         : [...current, place]
     );
   };
 
-  // API'ye rota oluşturma isteği gönderme
-  const createRoute = async () => {
-    if (!routeType || selectedPlaces.length === 0 || !duration) return;
+  const handleImageUpload = (file) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setUploadedImage(reader.result); // Base64 formatını doğrudan sakla
+    };
+    reader.onerror = () => {
+      message.error('Fotoğraf yüklenirken bir hata oluştu.');
+    };
+    reader.readAsDataURL(file);
+    return false;
+  };
 
-    // Kullanıcı profil fotoğrafını base64 formatına dönüştürme (örnek)
-    const imageData = await toBase64(user.avatarUrl);
+  const createRoute = async () => {
+    if (!routeType || selectedPlaces.length === 0 || !duration || !userId || !uploadedImage) {
+      message.error('Lütfen tüm alanları doldurunuz.');
+      return;
+    }
 
     const newRoute = {
-      name: `${routeType} Rota`, // Rota ismi
-      userId: user.username, // Kullanıcı ID'si
-      averageDuration: `${duration} saat`, // Ortalama süre
-      imageData: imageData, // Kullanıcı profil fotoğrafı (base64 formatında)
-      categoryId: routeCategories.find(category => category.value === routeType).label, // Rota kategorisi
-      places: selectedPlaces.map(place => ({
+      name: `${categories.find((cat) => cat.id === routeType)?.name} Rota`,
+      userId,
+      averageDuration: `${duration} saat`,
+      imageData: uploadedImage.split(',')[1],
+      categoryId: routeType,
+      places: selectedPlaces.map((place, index) => ({
         id: place.id,
-        sequence: selectedPlaces.indexOf(place),
+        sequence: index + 1,
         name: place.name,
-        description: `${place.category} kategorisinde bir yer` // Açıklama
-      }))
+        description: place.description,
+      })),
     };
 
     try {
-      // API'ye POST isteği gönderme
       const response = await fetch('https://localhost:7263/TravelRoute', {
         method: 'POST',
         headers: {
@@ -96,9 +125,7 @@ const NewRoutes = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
         message.success('Rota başarıyla oluşturuldu!');
-        // Yeni oluşturulan rotayı ekleme
       } else {
         message.error('Rota oluşturulurken bir hata oluştu.');
       }
@@ -107,28 +134,8 @@ const NewRoutes = () => {
     }
   };
 
-  // Profil fotoğrafını base64 formatına dönüştüren fonksiyon
-  const toBase64 = (url) => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', url, true);
-      xhr.responseType = 'blob';
-      xhr.onload = () => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve(reader.result.split(',')[1]); // Base64 string
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(xhr.response);
-      };
-      xhr.onerror = reject;
-      xhr.send();
-    });
-  };
-
-  // Geri tuşuna tıklandığında yönlendirme
   const handleBackClick = () => {
-    navigate('/our-routes'); // Geri butonuna basıldığında /our-routes sayfasına yönlendir
+    navigate('/our-routes');
   };
 
   return (
@@ -150,13 +157,6 @@ const NewRoutes = () => {
         >
           Geri
         </Button>
-        <video
-          src="/yenirota.mp4"
-          autoPlay
-          loop
-          muted
-          style={{ maxWidth: '100%', height: 'auto' }}
-        />
       </div>
 
       <Title level={2} style={{ textAlign: 'center', color: '#3C2A21', fontFamily: 'Lobster, sans-serif' }}>
@@ -166,6 +166,35 @@ const NewRoutes = () => {
       <Card style={{ marginBottom: '24px' }}>
         <Row gutter={[16, 16]}>
           <Col span={24}>
+            <Title level={4}>Kullanıcı ID</Title>
+            <Input
+              placeholder="Kullanıcı ID'si Girin"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+            />
+          </Col>
+
+          <Col span={24}>
+            <Title level={4}>Fotoğraf Yükleyin</Title>
+            <Upload
+              beforeUpload={handleImageUpload}
+              accept="image/*"
+              showUploadList={false}
+            >
+              <Button icon={<UploadOutlined />}>Fotoğraf Yükle</Button>
+            </Upload>
+            {uploadedImage && (
+              <div style={{ marginTop: '16px', textAlign: 'center' }}>
+                <img
+                  src={uploadedImage}
+                  alt="Yüklenen Fotoğraf"
+                  style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', border: '1px solid #ccc' }}
+                />
+              </div>
+            )}
+          </Col>
+
+          <Col span={24}>
             <Title level={4}>Yer Seçim Türünü Belirleyin</Title>
             <Radio.Group onChange={handleSelectionTypeChange} value={selectionType}>
               <Radio value="favorite">Favorilenen Yerler</Radio>
@@ -173,58 +202,62 @@ const NewRoutes = () => {
             </Radio.Group>
           </Col>
 
-          {selectionType && (
-            <>
-              <Col span={24}>
-                <Title level={4}>Rota Türünü Seçin</Title>
-                <Select
-                  style={{ width: '100%' }}
-                  placeholder="Rota Kategorisi Seçin"
-                  onChange={handleRouteTypeChange}
-                  options={routeCategories}
-                />
-              </Col>
+          <Col span={24}>
+            <Title level={4}>Rota Türünü Seçin</Title>
+            <Select
+              style={{ width: '100%' }}
+              placeholder="Rota Kategorisi Seçin"
+              onChange={handleRouteTypeChange}
+              options={categories.map((category) => ({
+                value: category.id,
+                label: category.name,
+              }))}
+            />
+          </Col>
 
-              <Col span={24}>
-                <Title level={4}>Yerler</Title>
-                <Row gutter={[8, 8]}>
-                  {popularPlaces
-                    .filter(place =>
-                      selectionType === 'all' ||
-                      (selectionType === 'favorite' && place.favorite)
-                    )
-                    .map(place => (
-                      <Col key={place.id} span={8}>
-                        <Checkbox
-                          checked={selectedPlaces.some(p => p.id === place.id)}
-                          onChange={() => togglePlaceSelection(place)}
-                        >
-                          {place.name}
-                        </Checkbox>
-                      </Col>
-                    ))}
-                </Row>
-              </Col>
+          <Col span={24}>
+            <Title level={4}>Yerler</Title>
+            <Row gutter={[8, 8]}>
+              {filteredPlaces.map((place) => (
+                <Col key={place.id} span={8}>
+                  <Checkbox
+                    checked={selectedPlaces.some((p) => p.id === place.id)}
+                    onChange={() => togglePlaceSelection(place)}
+                  >
+                    {place.name}
+                  </Checkbox>
+                </Col>
+              ))}
+            </Row>
+          </Col>
 
-              <Col span={24}>
-                <Title level={4}>Geziniz Kaç Saat Sürdü?</Title>
-                <InputNumber min={1} max={24} value={duration} onChange={setDuration} style={{ width: '100%' }} />
-              </Col>
+          <Col span={24}>
+            <Title level={4}>Geziniz Kaç Saat Sürdü?</Title>
+            <InputNumber
+              min={1}
+              max={24}
+              value={duration}
+              onChange={setDuration}
+              style={{ width: '100%' }}
+            />
+          </Col>
 
-              <Col span={24}>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={createRoute}
-                  block
-                  disabled={!routeType || !duration}
-                  style={{ backgroundColor: '#3C2A21', borderColor: '#3C2A21', color: 'white' }}
-                >
-                  Rotayı Oluştur
-                </Button>
-              </Col>
-            </>
-          )}
+          <Col span={24}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={createRoute}
+              block
+              disabled={!routeType || !duration || !userId || !uploadedImage || selectedPlaces.length === 0}
+              style={{
+                backgroundColor: '#3C2A21',
+                borderColor: '#3C2A21',
+                color: 'white',
+              }}
+            >
+              Rotayı Oluştur
+            </Button>
+          </Col>
         </Row>
       </Card>
     </div>
