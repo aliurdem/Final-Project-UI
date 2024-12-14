@@ -40,56 +40,61 @@ const Places = () => {
         flexDirection: 'column'
       }}
     >
-      {/* Üst Bar */}
+      {/* Header */}
       <div 
         style={{ 
           display: 'flex', 
-          justifyContent: 'space-between', 
+          flexDirection: 'column',
           alignItems: 'center',
-          padding: '10px 20px'
+          justifyContent: 'center',
+          width: '100%',
+          padding: '5px 0', // Header'ın dikey boyutunu artırdık
+          backgroundColor: '#493628', // Header arka plan rengi
         }}
       >
         <h1 style={{ 
-          color: '#493628', 
+          color: '#fff', // Başlık rengi beyaz
           fontSize: '28px', 
-          margin: 0
+          margin: 0,
+          fontFamily: 'Lobster, sans-serif'
         }}>
           Gezi Lokasyonları
         </h1>
-      </div>
 
-      {/* Arama Alanı */}
-      <div 
-        style={{
-          marginBottom: '10px',
-          display: 'flex',
-          justifyContent: 'center',
-          padding: '0 20px'
-        }}
-      >
-        <div style={{ position: 'relative', width: '300px' }}>
-          <input 
-            type="text"
-            placeholder="Gezilecek yer ara..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px 40px 10px 15px',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              outline: 'none',
-              fontSize: '14px',
-              backgroundColor: '#E9CBBF'
-            }}
-          />
-          <span style={{
-            position: 'absolute',
-            right: '15px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: '#493628'
-          }}>🔍</span>
+        {/* Arama Alanı */}
+        <div 
+          style={{
+            marginTop: '10px',
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
+            padding: '0 20px'
+          }}
+        >
+          <div style={{ position: 'relative', width: '300px' }}>
+            <input 
+              type="text"
+              placeholder="Gezilecek yer ara..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 40px 10px 15px',
+                borderRadius: '8px',
+                border: '1px solid #ccc',
+                outline: 'none',
+                fontSize: '14px',
+                backgroundColor: 'transparent', // Arama kutusunun arka planını renksiz yap
+              }}
+            />
+            <span style={{
+              position: 'absolute',
+              right: '15px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#493628'
+            }}>🔍</span>
+          </div>
         </div>
       </div>
 
