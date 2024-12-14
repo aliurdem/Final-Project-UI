@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  Row, 
-  Col, 
-  Card, 
-  Button, 
-  Select, 
-  Checkbox, 
-  Typography, 
-  Radio, 
-  Avatar 
-} from 'antd';
+import { Row, Col, Card, Button, Select, Checkbox, Typography, Radio, InputNumber, message } from 'antd';
 import { PlusOutlined, ArrowLeftOutlined } from '@ant-design/icons'; // Geri ok ikonu
 import { useNavigate } from 'react-router-dom'; // React Router'ı import et
 
@@ -20,12 +10,12 @@ const NewRoutes = () => {
   const [selectionType, setSelectionType] = useState(null);
   const [routeType, setRouteType] = useState(null);
   const [selectedPlaces, setSelectedPlaces] = useState([]);
-  const [createdRoutes, setCreatedRoutes] = useState([]);
+  const [duration, setDuration] = useState(null); // Yeni saat bilgisi state'i
 
   // Kullanıcı bilgileri
   const [user, setUser] = useState({
     username: 'Hatice Kartal',
-    avatarUrl: './avatar.png', 
+    avatarUrl: './avatar.png', // Base64 formatına dönüştürülmesi gerekiyor
   });
 
   const popularPlaces = [
@@ -47,7 +37,7 @@ const NewRoutes = () => {
   const handleSelectionTypeChange = (e) => {
     const value = e.target.value;
     setSelectionType(value);
-    
+
     if (value === 'favorite') {
       const favoritePlaces = popularPlaces.filter(place => place.favorite);
       setSelectedPlaces(favoritePlaces);
@@ -59,7 +49,7 @@ const NewRoutes = () => {
   const handleRouteTypeChange = (value) => {
     setRouteType(value);
     if (value !== 'karışık' && selectionType === 'favorite') {
-      const filteredPlaces = popularPlaces.filter(place => 
+      const filteredPlaces = popularPlaces.filter(place =>
         place.category === value && place.favorite
       );
       setSelectedPlaces(filteredPlaces);
@@ -67,24 +57,73 @@ const NewRoutes = () => {
   };
 
   const togglePlaceSelection = (place) => {
-    setSelectedPlaces(current => 
-      current.includes(place) 
+    setSelectedPlaces(current =>
+      current.includes(place)
         ? current.filter(p => p.id !== place.id)
         : [...current, place]
     );
   };
 
-  const createRoute = () => {
-    if (!routeType || selectedPlaces.length === 0) return;
+  // API'ye rota oluşturma isteği gönderme
+  const createRoute = async () => {
+    if (!routeType || selectedPlaces.length === 0 || !duration) return;
+
+    // Kullanıcı profil fotoğrafını base64 formatına dönüştürme (örnek)
+    const imageData = await toBase64(user.avatarUrl);
 
     const newRoute = {
-      id: Date.now(),
-      type: routeType,
-      places: selectedPlaces,
-      user: user,
+      name: `${routeType} Rota`, // Rota ismi
+      userId: user.username, // Kullanıcı ID'si
+      averageDuration: `${duration} saat`, // Ortalama süre
+      imageData: imageData, // Kullanıcı profil fotoğrafı (base64 formatında)
+      categoryId: routeCategories.find(category => category.value === routeType).label, // Rota kategorisi
+      places: selectedPlaces.map(place => ({
+        id: place.id,
+        sequence: selectedPlaces.indexOf(place),
+        name: place.name,
+        description: `${place.category} kategorisinde bir yer` // Açıklama
+      }))
     };
 
-    setCreatedRoutes([...createdRoutes, newRoute]);
+    try {
+      // API'ye POST isteği gönderme
+      const response = await fetch('https://localhost:7263/TravelRoute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newRoute),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        message.success('Rota başarıyla oluşturuldu!');
+        // Yeni oluşturulan rotayı ekleme
+      } else {
+        message.error('Rota oluşturulurken bir hata oluştu.');
+      }
+    } catch (error) {
+      message.error('Bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+  };
+
+  // Profil fotoğrafını base64 formatına dönüştüren fonksiyon
+  const toBase64 = (url) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'blob';
+      xhr.onload = () => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result.split(',')[1]); // Base64 string
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(xhr.response);
+      };
+      xhr.onerror = reject;
+      xhr.send();
+    });
   };
 
   // Geri tuşuna tıklandığında yönlendirme
@@ -94,45 +133,33 @@ const NewRoutes = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      {/* Video ve geri butonu kapsayıcısı */}
       <div style={{ position: 'relative', textAlign: 'center', marginBottom: '24px' }}>
-        {/* Geri butonu */}
-        <Button 
-  icon={<ArrowLeftOutlined />} 
-  onClick={handleBackClick} 
-  style={{ 
-    position: 'absolute', 
-    top: '10px', 
-    left: '10px', 
-    zIndex: 10, 
-    backgroundColor: '#3C2A21', // Arka plan rengi
-    color: 'white', // Metin rengi
-    border: 'none', // Kenarlık kaldırıldı
-  }} 
-  type="default"
->
-  Geri
-</Button>
-
-        
-        {/* Video */}
-        <video 
-          src="/yenirota.mp4" 
-          autoPlay 
-          loop 
-          muted 
+        <Button
+          icon={<ArrowLeftOutlined />}
+          onClick={handleBackClick}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            zIndex: 10,
+            backgroundColor: '#3C2A21',
+            color: 'white',
+            border: 'none',
+          }}
+          type="default"
+        >
+          Geri
+        </Button>
+        <video
+          src="/yenirota.mp4"
+          autoPlay
+          loop
+          muted
           style={{ maxWidth: '100%', height: 'auto' }}
         />
       </div>
 
-      <Title 
-        level={2} 
-        style={{ 
-          textAlign: 'center', 
-          color: '#3C2A21', 
-          fontFamily: 'Lobster, sans-serif' 
-        }}
-      >
+      <Title level={2} style={{ textAlign: 'center', color: '#3C2A21', fontFamily: 'Lobster, sans-serif' }}>
         Yeni Rota Oluştur
       </Title>
 
@@ -140,10 +167,7 @@ const NewRoutes = () => {
         <Row gutter={[16, 16]}>
           <Col span={24}>
             <Title level={4}>Yer Seçim Türünü Belirleyin</Title>
-            <Radio.Group 
-              onChange={handleSelectionTypeChange} 
-              value={selectionType}
-            >
+            <Radio.Group onChange={handleSelectionTypeChange} value={selectionType}>
               <Radio value="favorite">Favorilenen Yerler</Radio>
               <Radio value="all">Tüm Yerler</Radio>
             </Radio.Group>
@@ -165,8 +189,8 @@ const NewRoutes = () => {
                 <Title level={4}>Yerler</Title>
                 <Row gutter={[8, 8]}>
                   {popularPlaces
-                    .filter(place => 
-                      selectionType === 'all' || 
+                    .filter(place =>
+                      selectionType === 'all' ||
                       (selectionType === 'favorite' && place.favorite)
                     )
                     .map(place => (
@@ -178,8 +202,13 @@ const NewRoutes = () => {
                           {place.name}
                         </Checkbox>
                       </Col>
-                  ))}
+                    ))}
                 </Row>
+              </Col>
+
+              <Col span={24}>
+                <Title level={4}>Geziniz Kaç Saat Sürdü?</Title>
+                <InputNumber min={1} max={24} value={duration} onChange={setDuration} style={{ width: '100%' }} />
               </Col>
 
               <Col span={24}>
@@ -188,7 +217,7 @@ const NewRoutes = () => {
                   icon={<PlusOutlined />}
                   onClick={createRoute}
                   block
-                  disabled={!routeType}
+                  disabled={!routeType || !duration}
                   style={{ backgroundColor: '#3C2A21', borderColor: '#3C2A21', color: 'white' }}
                 >
                   Rotayı Oluştur
@@ -198,31 +227,6 @@ const NewRoutes = () => {
           )}
         </Row>
       </Card>
-
-      {createdRoutes.map(route => (
-        <Card key={route.id} style={{ marginBottom: '16px' }}>
-          <Title level={4}>Rota Detayları</Title>
-          <Text strong>Rota Türü: </Text>
-          <Text>{routeCategories.find(c => c.value === route.type)?.label}</Text>
-          <br />
-          <Text strong>Seçilen Yerler:</Text>
-          <ul>
-            {route.places.map(place => (
-              <li key={place.id}>{place.name}</li>
-            ))}
-          </ul>
-          <br />
-          <Text strong>Kullanıcı: </Text>
-          <Row align="middle">
-            <Col>
-              <Avatar src={route.user.avatarUrl} />
-            </Col>
-            <Col>
-              <Text>{route.user.username}</Text>
-            </Col>
-          </Row>
-        </Card>
-      ))}
     </div>
   );
 };
