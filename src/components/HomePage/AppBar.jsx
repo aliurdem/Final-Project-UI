@@ -4,18 +4,17 @@ import { Avatar } from 'antd';
 
 const AppBar = () => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState({ name: '', avatar: '' });
+  // Uygulama ilk açıldığında localStorage üzerinden login durumunu kontrol et
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+  const [userInfo, setUserInfo] = useState({ 
+    name: localStorage.getItem('username') || '' 
+  });
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
-    setIsLoggedIn(loggedInStatus);
-
-    if (loggedInStatus) {
-      const name = localStorage.getItem('username');
-      const avatar = localStorage.getItem('avatar');
-      setUserInfo({ name, avatar });
-    }
+    // Artık pingAuth yapmıyoruz, sadece localStorage’a göre kullanıcının login durumunu koruyoruz.
+    // Eğer güvenli tarafta olmak istersek burada pingAuth yapabiliriz, 
+    // ama istek üzerine bu mantığı kaldırıyoruz.
   }, []);
 
   const handleButtonClick = (index) => {
@@ -36,19 +35,36 @@ const AppBar = () => {
         navigate('/signup');
         break;
       case 5:
-        navigate('/places'); // Gezilecek Yerler butonu için yeni yol
+        navigate('/places');
         break;
       default:
         break;
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('username');
-    localStorage.removeItem('avatar');
-    setIsLoggedIn(false);
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('https://localhost:7263/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        // LocalStorage temizle
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('username');
+        
+        setIsLoggedIn(false);
+        setUserInfo({ name: '' });
+        navigate('/');
+      } else {
+        console.error('Logout failed');
+        setError('Çıkış yapılamadı, lütfen tekrar deneyin.');
+      }
+    } catch (err) {
+      console.error('Logout error:', err);
+      setError('Sunucuya bağlanırken bir hata oluştu.');
+    }
   };
 
   const handleAdminClick = () => {
@@ -64,17 +80,17 @@ const AppBar = () => {
         <button onClick={() => handleButtonClick(0)} style={{ marginLeft: '8px', marginRight:'10px', padding: '10px', borderRadius: '5px', backgroundColor: '#997c70', color: 'white' }}>Anasayfa</button>
         <button onClick={() => handleButtonClick(1)} style={{ marginLeft: '8px', marginRight:'10px', padding: '10px', borderRadius: '5px', backgroundColor: '#997c70', color: 'white' }}>Gezi Rotalarımız</button>
         <button onClick={() => handleButtonClick(2)} style={{ marginLeft: '8px', marginRight:'10px', padding: '10px', borderRadius: '5px', backgroundColor: '#997c70', color: 'white' }}>Biz Kimiz?</button>
-        {/* Yeni Gezilecek Yerler butonu */}
         <button onClick={() => handleButtonClick(5)} style={{ marginLeft: '8px', marginRight:'10px', padding: '10px', borderRadius: '5px', backgroundColor: '#997c70', color: 'white' }}>Gezilecek Yerler</button>
         
         {isLoggedIn ? (
           <div style={{ display: 'flex', alignItems: 'center', marginLeft: '10px' }}>
             <button onClick={handleLogout} style={{ marginLeft: '10px', padding: '5px 10px', borderRadius: '5px', backgroundColor: '#714a38', color: 'white' }}>Çıkış Yap</button>
-            <Avatar src={userInfo.avatar} alt="Avatar" style={{ marginLeft: '15px' }} />
+            {/* Avatar kullanmıyoruz, boş veya varsayılan bir şey istenmiyordu */}
+            {/* <Avatar src={''} alt="Avatar" style={{ marginLeft: '15px' }} /> */}
             <button 
               onClick={handleAdminClick} 
               style={{ 
-                marginLeft: '2px', 
+                marginLeft: '15px', 
                 background: 'none', 
                 border: 'none', 
                 color: '#000', 
@@ -114,6 +130,7 @@ const AppBar = () => {
           </div>
         )}
       </div>
+      {error && <div style={{ color: 'red', position: 'absolute', top: '10px', right: '10px' }}>{error}</div>}
     </div>
   );
 };

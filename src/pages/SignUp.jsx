@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './SignUp.css';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import icon1 from '/icon1.png';
 import icon2 from '/icon2.png';
 import icon3 from '/icon3.png';
@@ -9,7 +11,7 @@ import icon4 from '/icon4.png';
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessages, setErrorMessages] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
@@ -27,27 +29,53 @@ const SignUp = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        setSuccessMessage('Kayıt başarılı! Giriş yapabilirsiniz.');
-        setErrorMessage('');
-        setTimeout(() => navigate('/login'), 2000); // 2 saniye sonra giriş sayfasına yönlendir
+        // Başarılı kayıt durumunda toast göster
+        toast.success('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...', {
+          position: "top-right",
+          autoClose: 2000, // 2 saniye sonra otomatik kapanır
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+        });
+
+        setSuccessMessage(''); 
+        setErrorMessages([]);
+
+        // 2 saniye sonra login sayfasına yönlendir
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       } else {
-        const errorData = await response.json();
-        setErrorMessage(errorData.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.');
+        try {
+          const errorData = await response.json();
+          if (errorData.errors) {
+            const allErrorMessages = Object.values(errorData.errors).flat();
+            setErrorMessages(allErrorMessages);
+          } else {
+            setErrorMessages([errorData.title || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.']);
+          }
+        } catch (parseError) {
+          setErrorMessages(['Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.']);
+        }
         setSuccessMessage('');
       }
     } catch (error) {
       console.error('Hata oluştu:', error);
-      setErrorMessage('Bir hata oluştu. Lütfen tekrar deneyin.');
+      setErrorMessages(['Bir hata oluştu. Lütfen tekrar deneyin.']);
       setSuccessMessage('');
     }
   };
 
   return (
     <div className="signup-wrapper">
+      <ToastContainer />
       <div className="signup-container">
         <h2 className="title">Bize Katılın!</h2>
         <form className="signup-form" onSubmit={handleSubmit}>
@@ -68,7 +96,15 @@ const SignUp = () => {
             required
           />
           <button type="submit" className="submit-button">Kaydol</button>
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+          {errorMessages.length > 0 && (
+            <div className="error-message">
+              {errorMessages.map((msg, index) => (
+                <p key={index}>{msg}</p>
+              ))}
+            </div>
+          )}
+
           {successMessage && <p className="success-message">{successMessage}</p>}
         </form>
         <p className="login-text">

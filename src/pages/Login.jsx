@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
-import icon1 from '/icon1.png';
-import icon2 from '/icon2.png';
-import icon3 from '/icon3.png';
-import icon4 from '/icon4.png';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -12,23 +8,51 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Sabit kullanıcı adı ve şifreyi kontrol et
-    const correctUsername = 'admin';
-    const correctPassword = 'admin123';
+    try {
+      // Giriş isteği
+      const loginResponse = await fetch('https://localhost:7263/login?useCookies=true&useSessionCookies=true', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: username, password: password }),
+        credentials: 'include', // Kimlik doğrulama çerezlerini backend'den almak için
+      });
 
-    if (username === correctUsername && password === correctPassword) {
-      // Başarılı giriş
-      localStorage.setItem('isLoggedIn', 'true'); // Giriş durumunu kaydet
-      localStorage.setItem('username', 'Admin Kullanıcı');
-      localStorage.setItem('avatar', '/avatar.png');
-      
-      navigate('/'); // Ana sayfaya yönlendir
-    } else {
-      // Hatalı giriş
-      setErrorMessage('Kullanıcı adı veya şifre yanlış.');
+      if (loginResponse.ok) {
+        // Eğer giriş başarılıysa, kullanıcı bilgilerini çekmek için /me endpointine istek yap
+        const meResponse = await fetch('https://localhost:7263/me', {
+          method: 'GET',
+          credentials: 'include', // Çerezleri göndermek için
+        });
+
+        if (meResponse.ok) {
+          console.log("Başarılı Me")
+          const userData = await meResponse.json();
+          // Kullanıcı bilgilerini localStorage'a kaydet
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('email', userData.email || 'Belirtilmemiş');
+          localStorage.setItem('userId', userData.userId || 'Bilinmiyor');
+
+          navigate('/'); // Ana sayfaya yönlendir
+        } else {
+          console.log("Başarısız Me")
+
+          // Kullanıcı bilgileri alınamazsa hata mesajı göster
+          const errorData = await meResponse.json();
+          setErrorMessage(errorData.message || 'Kullanıcı bilgileri alınamadı.');
+        }
+      } else {
+        // Giriş başarısızsa hata mesajı göster
+        const errorData = await loginResponse.json();
+        setErrorMessage(errorData.message || 'Giriş başarısız.');
+      }
+    } catch (error) {
+      console.error('Giriş işlemi sırasında hata oluştu:', error);
+      setErrorMessage('Bir hata meydana geldi.');
     }
   };
 
@@ -37,17 +61,17 @@ const Login = () => {
       <div className="login-container">
         <h2 className="title">Hoşgeldiniz! Giriş İçin Bilgilerinizi Girin</h2>
         <form className="login-form" onSubmit={handleSubmit}>
-          <input 
-            type="text" 
-            placeholder="Kullanıcı Adı" 
-            className="input-field" 
+          <input
+            type="text"
+            placeholder="Kullanıcı Adı"
+            className="input-field"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-          <input 
-            type="password" 
-            placeholder="Şifre" 
-            className="input-field" 
+          <input
+            type="password"
+            placeholder="Şifre"
+            className="input-field"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -57,13 +81,6 @@ const Login = () => {
         <p className="signup-text">
           Henüz hesabınız yok mu? <a href="/signup" className="signup-link">Kaydol</a>
         </p>
-      </div>
-      <div className="image-container">
-        <img src="/login.png" alt="Kayıt İllustrasyonu" className="login-image" />
-        <img src={icon1} alt="İkon 1" className="icon icon-top-left" />
-        <img src={icon2} alt="İkon 2" className="icon icon-top-right" />
-        <img src={icon3} alt="İkon 3" className="icon icon-bottom-left" />
-        <img src={icon4} alt="İkon 4" className="icon icon-bottom-right" />
       </div>
     </div>
   );
