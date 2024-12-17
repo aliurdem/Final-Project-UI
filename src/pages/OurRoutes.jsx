@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Layout, Select, Button, Card, Col, Row, Modal, Spin } from 'antd';
 import { ClockCircleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../components/HomePage/UserContext'; 
+import './ourRoutes.css';
+
 
 const { Header } = Layout;
 const { Option } = Select;
@@ -13,6 +16,7 @@ const OurRoutes = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { isLoggedIn } = useContext(UserContext); // Kullanıcının giriş durumu
 
   const fetchAllRoutes = async () => {
     try {
@@ -138,7 +142,6 @@ const OurRoutes = () => {
           margin: 0,
         }}
       >
-        {/* Geri Butonu */}
         <Button
           icon={<ArrowLeftOutlined />}
           onClick={handleBackClick}
@@ -148,25 +151,23 @@ const OurRoutes = () => {
             border: 'none',
             fontSize: '16px',
             fontWeight: 'bold',
-            fontFamily: 'Lobster, sans-serif',
+            fontFamily: 'Roboto, sans-serif',
           }}
         >
           Geri
         </Button>
 
-        {/* Başlık */}
         <div
           style={{
             color: '#fff',
             fontSize: '24px',
             fontWeight: 'bold',
-            fontFamily: 'Lobster, sans-serif',
+            fontFamily: 'Roboto, sans-serif',
           }}
         >
           Gezi Rotalarımız
         </div>
 
-        {/* Boş bir alan, sağda başka bir içerik olmadığından şimdilik yer tutucu */}
         <div style={{ width: 48 }}></div>
       </Header>
 
@@ -181,54 +182,58 @@ const OurRoutes = () => {
         }}
       >
         <Select
-  defaultValue="all"
-  style={{
-    width: 250,
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontFamily: 'Lobster, sans-serif', // Yazı tipi burada doğru şekilde kalacak
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-  }}
-  dropdownStyle={{ fontFamily: 'Lobster, sans-serif' }} // Dropdown kısmına font ekleme
-  onChange={handleCategoryChange}
->
-  <Option value="all" style={{ fontFamily: 'Lobster, sans-serif' }}>Tüm Kategoriler</Option>
-  {categories.length > 0 ? (
-    categories.map((category) => (
-      <Option key={category.id} value={category.id} style={{ fontFamily: 'Lobster, sans-serif' }}>
-        {category.name}
-      </Option>
-    ))
-  ) : (
-    <Option disabled style={{ fontFamily: 'Lobster, sans-serif' }}>Yükleniyor...</Option>
-  )}
-</Select>
-
-
-
-        <Button
-          type="primary"
-          onClick={handleNewRouteClick}
+          defaultValue="all"
           style={{
-            marginLeft: 'auto',
-            backgroundColor: '#493628',
-            fontFamily: 'Lobster, sans-serif',
+            width: 250,
+            borderRadius: '8px',
             fontSize: '16px',
-            padding: '10px 20px',
-            fontWeight: 'bold',
-            borderRadius: '6px',
-            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+            fontFamily: 'Roboto, sans-serif',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           }}
+          dropdownStyle={{ fontFamily: 'Roboto, sans-serif'}}
+          onChange={handleCategoryChange}
         >
-          Yeni Rota Oluştur
-        </Button>
+          <Option value="all" style={{ fontFamily: 'Roboto, sans-serif', }}>
+            Tüm Kategoriler
+          </Option>
+          {categories.length > 0 ? (
+            categories.map((category) => (
+              <Option key={category.id} value={category.id} style={{ fontFamily: 'Roboto, sans-serif'}}>
+                {category.name}
+              </Option>
+            ))
+          ) : (
+            <Option disabled style={{ fontFamily: 'Roboto, sans-serif'}}>
+              Yükleniyor...
+            </Option>
+          )}
+        </Select>
+
+        {isLoggedIn && ( // Kullanıcı giriş yaptıysa göster
+          <Button
+            type="primary"
+            onClick={handleNewRouteClick}
+            style={{
+              marginLeft: 'auto',
+              backgroundColor: '#493628',
+              fontFamily: 'Roboto, sans-serif',
+              fontSize: '16px',
+              padding: '10px 20px',
+              fontWeight: 'bold',
+              borderRadius: '6px',
+              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            Yeni Rota Oluştur
+          </Button>
+        )}
       </div>
 
       <div style={{ padding: '20px' }}>
         <Row gutter={[16, 16]}>
           {routes.length > 0 ? (
             routes.map((route) => (
-              <Col span={8} key={route.id}>
+              <Col span={4} key={route.id}>
                 <Card
                   title={route.name}
                   bordered={false}
@@ -282,44 +287,89 @@ const OurRoutes = () => {
       </div>
 
       <Modal
-        visible={isModalVisible}
-        title={
-          <div
+  visible={isModalVisible}
+  title={
+    <div
+      style={{
+        fontFamily: 'Roboto, sans-serif',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        color: '#AB886D',
+        textAlign: 'center',
+      }}
+    >
+      {selectedRoute?.name || 'Rota Detayı'}
+    </div>
+  }
+  onCancel={handleModalClose}
+  footer={null}
+  centered
+  bodyStyle={{
+    padding: '20px',
+    fontFamily: 'Roboto, sans-serif',
+    backgroundColor: '#FDF9F6',
+    borderRadius: '12px',
+  }}
+>
+  {loading ? (
+    <div style={{ textAlign: 'center' }}>
+      <Spin size="large" />
+    </div>
+  ) : selectedRoute ? (
+    <div>
+      {selectedRoute.imageData && (
+        <img
+          alt={selectedRoute.name}
+          src={`data:image/jpeg;base64,${selectedRoute.imageData}`}
+          style={{
+            width: '100%',
+            maxHeight: '250px',
+            objectFit: 'cover',
+            borderRadius: '12px',
+            marginBottom: '20px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }}
+        />
+      )}
+      <p style={{ fontSize: '18px', color: '#493628', marginBottom: '12px' }}>
+        <strong>Ad:</strong> {selectedRoute.name}
+      </p>
+      <p style={{ fontSize: '16px', color: '#7A5A4A' }}>
+        <strong>Kullanıcı ID:</strong> {selectedRoute.userId}
+      </p>
+      <h3 style={{ fontSize: '20px', color: '#AB886D', marginTop: '20px' }}>Ziyaret Noktaları:</h3>
+      <ul
+        style={{
+          padding: 0,
+          listStyle: 'none',
+          marginTop: '10px',
+        }}
+      >
+        {selectedRoute.places.map((place) => (
+          <li
+            key={place.id}
             style={{
-              fontFamily: 'Lobster, sans-serif',
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#AB886D',
+              marginBottom: '12px',
+              padding: '10px',
+              backgroundColor: '#EADDD6',
+              borderRadius: '8px',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
             }}
           >
-            {selectedRoute?.name || 'Rota Detayı'}
-          </div>
-        }
-        onCancel={handleModalClose}
-        footer={null}
-      >
-        {loading ? (
-          <Spin size="large" />
-        ) : selectedRoute ? (
-          <div>
-            <p>
-              <strong>Ad:</strong> {selectedRoute.name}
-            </p>
-            <p>
-              <strong>Kullanıcı ID:</strong> {selectedRoute.userId}
-            </p>
-            <ul>
-              {selectedRoute.places.map((place) => (
-                <li key={place.id}>
-                  {place.sequence}. {place.name} - {place.description}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <p>Veri bulunamadı.</p>
-        )}
-      </Modal>
+            <span style={{ fontWeight: 'bold', color: '#493628' }}>
+              {place.sequence}. {place.name}
+            </span>
+            <p style={{ margin: 0, color: '#7A5A4A' }}>{place.description}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : (
+    <p style={{ textAlign: 'center', color: '#AB886D', fontSize: '18px' }}>
+      Veri bulunamadı.
+    </p>
+  )}
+</Modal>
     </Layout>
   );
 };

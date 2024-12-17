@@ -1,24 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import Slider from 'react-slick';
-import { Modal } from 'antd';
+import { Modal, message } from 'antd';
 import axios from 'axios';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import logo from '/edirnelogorenkli.png'; // Placeholder image
+import { UserContext } from './UserContext'; // Kullanıcı giriş durumu için context
 
 const CustomSlider = () => {
   const sliderRef = useRef(null);
+  const { isLoggedIn } = useContext(UserContext); // Kullanıcının giriş durumu
 
   const [sliderData, setSliderData] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isFav, setIsFav] = useState(false);
 
   // API'den veri çek
   useEffect(() => {
     axios.get('https://localhost:7263/Place/GetAll')
       .then(response => {
-        // response.data.data yapısında beklenen alanlar:
-        // id, name, description, imageData, categoryId, categoryName, locationInfo, visitHours, entranceFee
         setSliderData(response.data.data);
       })
       .catch(error => {
@@ -28,6 +29,7 @@ const CustomSlider = () => {
 
   const showModal = (item) => {
     setSelectedItem(item);
+    setIsFav(checkIfFav(item.id)); // Favori durumunu kontrol et
     setIsModalVisible(true);
   };
 
@@ -36,12 +38,68 @@ const CustomSlider = () => {
     setSelectedItem(null);
   };
 
+  // Favori kontrol fonksiyonu
+  const checkIfFav = (placeId) => {
+    const favList = JSON.parse(localStorage.getItem('userFavList')) || [];
+    return favList.some((fav) => fav.placeId === placeId);
+  };
+
+  // Favori ekle/kaldır
+  const toggleFav = async () => {
+    if (isFav) {
+      await removeFromFav(selectedItem.id);
+    } else {
+      await addToFav(selectedItem.id);
+    }
+    setIsFav(!isFav);
+  };
+
+  const addToFav = async (placeId) => {
+    try {
+      const response = await axios.post(
+        'https://localhost:7263/UserFav',
+        { placeId },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        const favList = JSON.parse(localStorage.getItem('userFavList')) || [];
+        favList.push({ placeId });
+        localStorage.setItem('userFavList', JSON.stringify(favList));
+        message.success("Favorilere eklendi!");
+      }
+    } catch (error) {
+      console.error("Favorilere ekleme hatası:", error);
+      message.error("Favorilere eklenirken bir hata oluştu.");
+    }
+  };
+
+  const removeFromFav = async (placeId) => {
+    try {
+      const response = await axios.post(
+        'https://localhost:7263/RemoveUserFav',
+        { placeId },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        const favList = JSON.parse(localStorage.getItem('userFavList')) || [];
+        const updatedList = favList.filter((fav) => fav.placeId !== placeId);
+        localStorage.setItem('userFavList', JSON.stringify(updatedList));
+        message.success("Favorilerden kaldırıldı!");
+      }
+    } catch (error) {
+      console.error("Favorilerden kaldırma hatası:", error);
+      message.error("Favorilerden kaldırılırken bir hata oluştu.");
+    }
+  };
+
   const settings = {
     dots: true,
     infinite: true,
     speed: 500,
     autoplay: true,
-    autoplaySpeed: 3000, 
+    autoplaySpeed: 3000,
     slidesToShow: 5,
     slidesToScroll: 1,
     centerMode: true,
@@ -71,21 +129,21 @@ const CustomSlider = () => {
     <div style={{ position: 'relative', width: '100vw', backgroundColor: '#FFFFFF', padding: '20px' }}>
       <Slider ref={sliderRef} {...settings}>
         {sliderData.map((item) => {
-          const imageSrc = item.imageData 
-            ? `data:image/jpeg;base64,${item.imageData}` 
+          const imageSrc = item.imageData
+            ? `data:image/jpeg;base64,${item.imageData}`
             : logo; // imageData boşsa logo kullan
 
           return (
             <div key={item.id} onClick={() => showModal(item)} style={{ cursor: 'pointer', margin: '10px 5px' }}>
-              <img 
-                alt={`Slider ${item.id}`} 
-                src={imageSrc} 
-                style={{ 
-                  height: '350px', 
-                  width: '280px', 
-                  objectFit: 'contain', 
-                  borderRadius: '8px' 
-                }} 
+              <img
+                alt={`Slider ${item.id}`}
+                src={imageSrc}
+                style={{
+                  height: '350px',
+                  width: '280px',
+                  objectFit: 'contain',
+                  borderRadius: '8px'
+                }}
               />
             </div>
           );
@@ -97,7 +155,6 @@ const CustomSlider = () => {
         footer={null}
         width={'60%'}
         onCancel={handleCancel}
-        closeIcon={null}
         bodyStyle={{
           backgroundColor: '#F6EFE9',
           borderRadius: '20px',
@@ -107,32 +164,12 @@ const CustomSlider = () => {
           alignItems: 'center',
         }}
       >
-        <button 
-          onClick={handleCancel} 
-          style={{ 
-            position: 'absolute', 
-            top: '20px', 
-            right: '20px', 
-            backgroundColor: 'transparent', 
-            border: 'none', 
-            fontSize: '18px', 
-            cursor: 'pointer', 
-            color: '#493628' 
-          }}
-        >
-          ✕
-        </button>
-
         {selectedItem && (
           <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', width: '100%' }}>
-            {/* Görsel alanı */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <img
                 alt={selectedItem.name}
-                src={selectedItem.imageData 
-                  ? `data:image/jpeg;base64,${selectedItem.imageData}`
-                  : logo
-                }
+                src={selectedItem.imageData ? `data:image/jpeg;base64,${selectedItem.imageData}` : logo}
                 style={{
                   width: '280px',
                   height: '380px',
@@ -140,37 +177,25 @@ const CustomSlider = () => {
                   objectFit: 'cover',
                 }}
               />
-              <div 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px', 
-                  marginTop: '10px', 
-                  cursor: 'pointer',
-                  transition: 'color 0.3s ease',
-                }}
-              >
-                <span 
-                  style={{ 
-                    fontSize: '24px', 
-                    color: '#685752',
+              {isLoggedIn && (
+                <div
+                  onClick={toggleFav}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginTop: '10px',
+                    cursor: 'pointer',
+                    color: isFav ? '#ff4d4f' : '#493628',
+                    fontWeight: '500',
                   }}
                 >
-                  &#9829;
-                </span>
-                <span 
-                  style={{ 
-                    fontSize: '16px', 
-                    fontWeight: '500', 
-                    color: '#997C70' 
-                  }}
-                >
-                  Favorilere Ekle
-                </span>
-              </div>
+                  <span style={{ fontSize: '24px' }}>{isFav ? '❤️' : '🤍'}</span>
+                  <span>{isFav ? 'Favorilerden Kaldır' : 'Favorilere Ekle'}</span>
+                </div>
+              )}
             </div>
 
-            {/* Metin alanı */}
             <div
               style={{
                 flex: 1,

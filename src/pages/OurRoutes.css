@@ -1,0 +1,72 @@
+/* Genel Arka Plan */
+body {
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Header */
+.header {
+    background-color: #493628 !important;
+    color: #fff;
+    padding: 10px 20px;
+    font-family: 'Roboto, sans-serif';
+}
+
+/* Kart Konteyneri */
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Kart Tasarımı */
+.ant-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #D0B8A8 !important;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* .ant-card:hover {
+    transform: scale(1.03);
+    cursor: pointer;
+} */
+
+.ant-card img {
+    border-radius: 8px 8px 0 0;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Süre Bilgisi */
+.card-duration {
+    font-size: 0.9em;
+    color: #555;
+    display: flex;
+    align-items: center;
+}
+
+/* Buton */
+.button-primary {
+    background-color: #493628 !important;
+    color: #fff !important;
+    font-family: 'Roboto, sans-serif';
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+}
+
+.button-primary:hover {
+    background-color: #3e2a1f !important;
+}
+
+/* Modal İçerik */
+.modal-title {
+    font-family: 'Roboto, sans-serif';
+    color: #AB886D;
+    font-size: 24px;
+}

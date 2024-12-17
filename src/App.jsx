@@ -11,14 +11,15 @@ import AdminPanel from './pages/AdminPanel';
 import Favorites from './pages/Favorites';
 import NewRoutes from './pages/NewRoutes';
 import Places from './pages/Places';
+import { UserProvider } from './components/HomePage/UserContext';
 
 const { Header, Content, Footer } = Layout;
 
 function App() {
   return (
-    <Router>
+    <UserProvider>
+   <Router>
       <Layout>
-        
         <Content>
           <Routes>
             <Route path="/" element={<HomePage/>} />
@@ -35,6 +36,7 @@ function App() {
         </Content>
               </Layout>
     </Router>
+    </UserProvider>
   );
 }
 

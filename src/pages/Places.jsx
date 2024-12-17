@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { message, Modal } from 'antd';
+import { HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { UserContext } from '../components/HomePage/UserContext';
 
 const Places = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [places, setPlaces] = useState([]);
+  const [favList, setFavList] = useState([]);
+  const [selectedPlace, setSelectedPlace] = useState(null); // Seçilen yer için state
+  const [isModalVisible, setIsModalVisible] = useState(false); // Modal görünürlüğü için state
+  const { isLoggedIn } = useContext(UserContext);
 
   useEffect(() => {
-    // API'yi kendi adresinize göre güncelleyin
-    axios.get('https://localhost:7263/Place/GetAll') 
+    // Yerleri API'den çek
+    axios.get('https://localhost:7263/Place/GetAll')
       .then(response => {
         const apiData = response.data.data || [];
         const transformedData = apiData.map(item => ({
@@ -21,7 +28,77 @@ const Places = () => {
       .catch(error => {
         console.error("Veri çekme hatası:", error);
       });
+
+    // Favori listesini localStorage'dan yükle
+    const storedFavList = JSON.parse(localStorage.getItem('userFavList')) || [];
+    setFavList(storedFavList);
   }, []);
+
+  // Favori kontrol fonksiyonu
+  const isFavorite = (placeId) => {
+    return favList.some((fav) => fav.placeId === placeId);
+  };
+
+  // Favori ekleme/kaldırma
+  const toggleFavorite = async (placeId) => {
+    if (!isLoggedIn) return;
+    if (isFavorite(placeId)) {
+      await removeFromFavorites(placeId);
+    } else {
+      await addToFavorites(placeId);
+    }
+  };
+
+  const addToFavorites = async (placeId) => {
+    try {
+      const response = await axios.post(
+        'https://localhost:7263/UserFav',
+        { placeId },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        const updatedFavList = [...favList, { placeId }];
+        setFavList(updatedFavList);
+        localStorage.setItem('userFavList', JSON.stringify(updatedFavList));
+        message.success('Favorilere eklendi!');
+      }
+    } catch (error) {
+      console.error("Favorilere ekleme hatası:", error);
+      message.error('Favorilere eklenirken bir hata oluştu.');
+    }
+  };
+
+  const removeFromFavorites = async (placeId) => {
+    try {
+      const response = await axios.post(
+        'https://localhost:7263/RemoveUserFav',
+        { placeId },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        const updatedFavList = favList.filter((fav) => fav.placeId !== placeId);
+        setFavList(updatedFavList);
+        localStorage.setItem('userFavList', JSON.stringify(updatedFavList));
+        message.success('Favorilerden kaldırıldı!');
+      }
+    } catch (error) {
+      console.error("Favorilerden kaldırma hatası:", error);
+      message.error('Favorilerden kaldırılırken bir hata oluştu.');
+    }
+  };
+
+  // Modal kontrol
+  const openModal = (place) => {
+    setSelectedPlace(place);
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setSelectedPlace(null);
+    setIsModalVisible(false);
+  };
 
   const filteredPlaces = places.filter(place =>
     place.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -48,12 +125,12 @@ const Places = () => {
           alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
-          padding: '5px 0', // Header'ın dikey boyutunu artırdık
-          backgroundColor: '#493628', // Header arka plan rengi
+          padding: '5px 0',
+          backgroundColor: '#493628',
         }}
       >
         <h1 style={{ 
-          color: '#fff', // Başlık rengi beyaz
+          color: '#fff',
           fontSize: '28px', 
           margin: 0,
           fontFamily: 'Lobster, sans-serif'
@@ -84,7 +161,7 @@ const Places = () => {
                 border: '1px solid #ccc',
                 outline: 'none',
                 fontSize: '14px',
-                backgroundColor: 'transparent', // Arama kutusunun arka planını renksiz yap
+                backgroundColor: 'transparent',
               }}
             />
             <span style={{
@@ -98,16 +175,15 @@ const Places = () => {
         </div>
       </div>
 
-      {/* Kartlar Grid: Her satırda 4 tane, daha küçük görseller için sabit yükseklik */}
+      {/* Kartlar Grid */}
       <div 
         style={{
           flex: 1,
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '5px',
-          margin: 0,
-          padding: 0,
-          // Eğer sayfanın tamamını kapsıyorsa ve scroll isterseniz:
+          gap: '10px',
+          margin: '10px',
+          padding: '10px',
           overflowY: 'auto'
         }}
       >
@@ -120,11 +196,12 @@ const Places = () => {
               position: 'relative',
               cursor: 'pointer',
               boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-              height: '250px', // Sabit yükseklik ayarı
+              height: '250px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end'
             }}
+            onClick={() => openModal(place)}
           >
             <img 
               src={place.image} 
@@ -154,6 +231,87 @@ const Places = () => {
           </div>
         ))}
       </div>
+
+      {/* Modal */}
+      {selectedPlace && (
+        <Modal
+          open={isModalVisible}
+          footer={null}
+          width={'60%'}
+          onCancel={closeModal}
+          bodyStyle={{
+            backgroundColor: '#F6EFE9',
+            borderRadius: '20px',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <img
+                alt={selectedPlace.name}
+                src={selectedPlace.image}
+                style={{
+                  width: '280px',
+                  height: '380px',
+                  borderRadius: '12px',
+                  objectFit: 'cover',
+                }}
+              />
+              {isLoggedIn && (
+                <div
+                  onClick={() => toggleFavorite(selectedPlace.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginTop: '10px',
+                    cursor: 'pointer',
+                    color: isFavorite(selectedPlace.id) ? '#ff4d4f' : '#493628',
+                    fontWeight: '500',
+                  }}
+                >
+                  {isFavorite(selectedPlace.id) ? <HeartFilled /> : <HeartOutlined />}
+                  <span>
+                    {isFavorite(selectedPlace.id) ? 'Favorilerden Kaldır' : 'Favorilere Ekle'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{
+                flex: 1,
+                backgroundColor: '#FDF8F4',
+                borderRadius: '10px',
+                padding: '15px',
+                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              <h2 style={{ color: '#493628', marginBottom: '10px' }}>{selectedPlace.name}</h2>
+              <p style={{ color: '#493628', fontSize: '16px', lineHeight: '1.5' }}>
+                {selectedPlace.description}
+              </p>
+              <ul style={{ color: '#493628', fontSize: '14px', listStyle: 'none', padding: 0, marginTop: '20px' }}>
+                <li>
+                  <span style={{ marginRight: '8px', fontWeight: 'bold' }}>📍</span>
+                  Konum: {selectedPlace.locationInfo}
+                </li>
+                <li>
+                  <span style={{ marginRight: '8px', fontWeight: 'bold' }}>⏰</span>
+                  Ziyaret Saatleri: {selectedPlace.visitableHours}
+                </li>
+                <li>
+                  <span style={{ marginRight: '8px', fontWeight: 'bold' }}>💰</span>
+                  Giriş Ücreti: {selectedPlace.entranceFee}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

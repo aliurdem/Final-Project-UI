@@ -1,45 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar } from 'antd';
+import { UserContext } from './UserContext';
+import { Dropdown, Menu, message } from 'antd';
+import { DownOutlined, UserOutlined } from '@ant-design/icons';
 
 const AppBar = () => {
   const navigate = useNavigate();
-  // Uygulama ilk açıldığında localStorage üzerinden login durumunu kontrol et
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
-  const [userInfo, setUserInfo] = useState({ 
-    name: localStorage.getItem('username') || '' 
-  });
+  const { isLoggedIn, logout } = useContext(UserContext);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    // Artık pingAuth yapmıyoruz, sadece localStorage’a göre kullanıcının login durumunu koruyoruz.
-    // Eğer güvenli tarafta olmak istersek burada pingAuth yapabiliriz, 
-    // ama istek üzerine bu mantığı kaldırıyoruz.
-  }, []);
-
-  const handleButtonClick = (index) => {
-    switch (index) {
-      case 0:
-        navigate('/');
-        break;
-      case 1:
-        navigate('/our-routes');
-        break;
-      case 2:
-        navigate('/about');
-        break;
-      case 3:
-        navigate('/login');
-        break;
-      case 4:
-        navigate('/signup');
-        break;
-      case 5:
-        navigate('/places');
-        break;
-      default:
-        break;
-    }
+  const handleButtonClick = (path) => {
+    navigate(path);
   };
 
   const handleLogout = async () => {
@@ -47,92 +18,127 @@ const AppBar = () => {
       const response = await fetch('https://localhost:7263/logout', {
         method: 'POST',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.ok) {
-        // LocalStorage temizle
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('username');
-        
-        setIsLoggedIn(false);
-        setUserInfo({ name: '' });
+        logout();
         navigate('/');
+        message.success('Çıkış yapıldı!');
       } else {
-        console.error('Logout failed');
-        setError('Çıkış yapılamadı, lütfen tekrar deneyin.');
+        const errorData = await response.json();
+        setError(errorData.message || 'Çıkış yapılamadı, lütfen tekrar deneyin.');
       }
     } catch (err) {
-      console.error('Logout error:', err);
       setError('Sunucuya bağlanırken bir hata oluştu.');
     }
   };
 
-  const handleAdminClick = () => {
-    navigate('/admin-panel');
-  };
+  // Dropdown Menü Elemanları
+  const menu = (
+    <Menu>
+      <Menu.Item key="1" onClick={() => handleButtonClick('/profile')}>
+        Profilim
+      </Menu.Item>
+      <Menu.Item key="2" onClick={() => handleButtonClick('/my-routes')}>
+        Rotalarım
+      </Menu.Item>
+      <Menu.Item key="3" onClick={() => handleButtonClick('/admin-panel')}>
+        Admin Paneli
+      </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="4" danger onClick={handleLogout}>
+        Çıkış Yap
+      </Menu.Item>
+    </Menu>
+  );
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
+    <div style={appBarStyle}>
       <div>
         <img src="/logo1.png" alt="Logo" style={{ height: '90px', marginLeft: '10px' }} />
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1, justifyContent: 'flex-end' }}>
-        <button onClick={() => handleButtonClick(0)} style={{ marginLeft: '8px', marginRight:'10px', padding: '10px', borderRadius: '5px', backgroundColor: '#997c70', color: 'white' }}>Anasayfa</button>
-        <button onClick={() => handleButtonClick(1)} style={{ marginLeft: '8px', marginRight:'10px', padding: '10px', borderRadius: '5px', backgroundColor: '#997c70', color: 'white' }}>Gezi Rotalarımız</button>
-        <button onClick={() => handleButtonClick(2)} style={{ marginLeft: '8px', marginRight:'10px', padding: '10px', borderRadius: '5px', backgroundColor: '#997c70', color: 'white' }}>Biz Kimiz?</button>
-        <button onClick={() => handleButtonClick(5)} style={{ marginLeft: '8px', marginRight:'10px', padding: '10px', borderRadius: '5px', backgroundColor: '#997c70', color: 'white' }}>Gezilecek Yerler</button>
-        
+
+      <div style={navContainerStyle}>
+        <button onClick={() => handleButtonClick('/')} style={buttonStyle}>Anasayfa</button>
+        <button onClick={() => handleButtonClick('/our-routes')} style={buttonStyle}>Gezi Rotalarımız</button>
+        <button onClick={() => handleButtonClick('/about')} style={buttonStyle}>Biz Kimiz?</button>
+        <button onClick={() => handleButtonClick('/places')} style={buttonStyle}>Gezilecek Yerler</button>
+
         {isLoggedIn ? (
-          <div style={{ display: 'flex', alignItems: 'center', marginLeft: '10px' }}>
-            <button onClick={handleLogout} style={{ marginLeft: '10px', padding: '5px 10px', borderRadius: '5px', backgroundColor: '#714a38', color: 'white' }}>Çıkış Yap</button>
-            {/* Avatar kullanmıyoruz, boş veya varsayılan bir şey istenmiyordu */}
-            {/* <Avatar src={''} alt="Avatar" style={{ marginLeft: '15px' }} /> */}
-            <button 
-              onClick={handleAdminClick} 
-              style={{ 
-                marginLeft: '15px', 
-                background: 'none', 
-                border: 'none', 
-                color: '#000', 
-                textDecoration: 'underline', 
-                cursor: 'pointer', 
-                marginRight: '9px'
-              }}>
-              {userInfo.name}
+          <Dropdown overlay={menu} trigger={['click']}>
+            <button style={userMenuStyle}>
+              <UserOutlined style={{ fontSize: '16px', marginRight: '4px' }} />
+              <DownOutlined />
             </button>
-          </div>
+          </Dropdown>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button 
-              onClick={() => handleButtonClick(3)} 
-              style={{ 
-                marginRight: '5px', 
-                padding: '10px', 
-                borderRadius: '5px', 
-                backgroundColor: '#493628', 
-                color: 'white' 
-              }}
-            >
-              Giriş Yap
-            </button>
-            <button 
-              onClick={() => handleButtonClick(4)} 
-              style={{ 
-                marginLeft: '5px', 
-                padding: '10px', 
-                borderRadius: '5px', 
-                backgroundColor: '#493628', 
-                color: 'white' 
-              }}
-            >
-              Kayıt Ol
-            </button>
+          <div>
+            <button onClick={() => handleButtonClick('/login')} style={authButtonStyle}>Giriş Yap</button>
+            <button onClick={() => handleButtonClick('/signup')} style={authButtonStyle}>Kayıt Ol</button>
           </div>
         )}
       </div>
-      {error && <div style={{ color: 'red', position: 'absolute', top: '10px', right: '10px' }}>{error}</div>}
+
+      {error && <div style={errorStyle}>{error}</div>}
     </div>
   );
+};
+
+// Stiller
+const appBarStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: '#FFFFFF',
+  padding: '10px',
+};
+
+const navContainerStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  flexGrow: 1,
+  justifyContent: 'flex-end',
+};
+
+const buttonStyle = {
+  marginLeft: '8px',
+  marginRight: '10px',
+  padding: '10px',
+  borderRadius: '5px',
+  backgroundColor: '#997c70',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+};
+
+const authButtonStyle = {
+  marginLeft: '5px',
+  marginRight: '5px',
+  padding: '10px',
+  borderRadius: '5px',
+  backgroundColor: '#493628',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+};
+
+const userMenuStyle = {
+  marginLeft: '15px',
+  padding: '10px',
+  borderRadius: '5px',
+  backgroundColor: '#493628',
+  border: '1px solid #ccc',
+  display: 'flex',
+  alignItems: 'center',
+  cursor: 'pointer',
+};
+
+const errorStyle = {
+  color: 'red',
+  position: 'absolute',
+  top: '10px',
+  right: '10px',
 };
 
 export default AppBar;
