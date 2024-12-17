@@ -1,11 +1,19 @@
+/* Global Reset and Box Sizing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Root Variables and Styles */
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #f5e5d7;
+  color: #213547;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,60 +21,94 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+/* Body, Root, and Full-Height Layout */
 body, html, #root {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-}
-.ant-layout {
-  margin: 0;
-  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden; /* Prevents horizontal scroll */
 }
 
+/* Hyperlink Styles */
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
 
+a:hover {
+  color: #535bf2;
+}
+
+/* Typography */
 h1 {
-  font-size: 3.2em;
+  font-size: 2.5rem; /* Adjusted for better scalability */
   line-height: 1.1;
 }
 
+h2, h3, h4, h5, h6 {
+  line-height: 1.3;
+  margin-bottom: 1rem;
+}
+
+/* Buttons */
 button {
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  padding: 8px 16px;
+  font-size: 1rem;
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
+  color: #ffffff;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.3s ease;
 }
 
+button:hover {
+  border-color: #646cff;
+  background-color: #333333;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 3px solid #646cff;
+  outline-offset: 2px;
+}
+
+/* Ant Design Layout Fix */
+.ant-layout {
+  margin: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Responsive Adjustments */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: #f9f9f9;
   }
+  
+  button {
+    background-color: #f0f0f0;
+    color: #213547;
+  }
+
   a:hover {
     color: #747bff;
   }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
   button {
-    background-color: #f9f9f9;
+    font-size: 0.9rem;
+    padding: 6px 12px;
   }
 }

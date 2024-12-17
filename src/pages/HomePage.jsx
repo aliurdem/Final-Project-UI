@@ -1,5 +1,4 @@
 import React from 'react'
-import AppBar from '../components/HomePage/AppBar'
 import BridgeDiscover from '../components/HomePage/BridgeDiscover'
 import SearchBox from '../components/HomePage/SearchBox'
 import Slider from '../components/HomePage/Slider'
@@ -9,7 +8,6 @@ import Footer from '../components/HomePage/Footer'
 const HomePage = () => {
   return (
     <div>
-     <AppBar/>
      <BridgeDiscover/>
      <SearchBox/>
      <Slider/>

@@ -6,6 +6,9 @@ import axios from 'axios';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DeleteOutlined } from '@ant-design/icons';
+import { LeftOutlined } from '@ant-design/icons';
+import { RightOutlined  } from '@ant-design/icons';
+import logo from '/edirnelogorenkli.png'; // Placeholder image
 
 
 const { Title } = Typography;
@@ -109,9 +112,11 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
   };
 
   const handleRemovePlace = (placeId) => {
-    setSelectedPlaces((prev) => prev.filter((id) => id !== placeId));
+    setSelectedPlaces((prev) => {
+      const updatedPlaces = prev.filter((id) => id !== placeId);
+      return updatedPlaces;
+    });
   };
-
   const handleImageUpload = (file) => {
     const reader = new FileReader();
     reader.onload = () => setUploadedImage(reader.result);
@@ -164,7 +169,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
 
   return (
     <div>
-      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+      {/* <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
         <video autoPlay muted loop style={{ width: '100%', objectFit: 'cover' }}>
           <source src="/yenirota.mp4" type="video/mp4" />
           Tarayıcınız video etiketini desteklemiyor.
@@ -185,7 +190,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
         >
           Geri
         </Button>
-      </div>
+      </div> */}
 
       <div style={{ padding: '24px' }}>
         <Title level={2} style={{ textAlign: 'center', color: '#3C2A21', fontFamily: 'Lobster, sans-serif' }}>
@@ -279,44 +284,157 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
   </Col>
 
   <Col span={12}>
-    <Card style={{ height: '100%' }}>
+  <Card style={{ height: '100%', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', borderRadius: '12px' }}>
     <Row gutter={[16, 16]} align="stretch">
-          <Col span={24}>
-            <Card>
-              <Title level={4}>Yerleri Seçin</Title>
-              <Checkbox.Group
-                style={{ width: '100%' }}
-                onChange={(values) => setSelectedPlaces(values)}
-                options={places.map((place) => ({
-                  label: place.name,
-                  value: place.id,
-                }))}
-              />
-            </Card>
-          </Col>
-
-          <Col span={24}>
-            <Card>
-              <Title level={4}>Seçilen Yerler (Sıralama ve Silme)</Title>
-              <DndProvider backend={HTML5Backend}>
-                {selectedPlaces.map((placeId, index) => {
-                  const place = places.find((p) => p.id === placeId);
-                  return (
-                    <DraggableListItem
-                      key={placeId}
-                      place={place}
-                      index={index}
-                      movePlace={movePlace}
-                      removePlace={handleRemovePlace}
+      <Col span={24}>
+        <Card style={{ background: '#f8f9fa', border: 'none', borderRadius: '12px' }}>
+          <Title level={4} style={{ color: '#3C2A21', fontWeight: 'bold' }}>Yerleri Seçin</Title>
+          <div style={{ position: 'relative', overflow: 'hidden' }}>
+            <Button
+              icon={<LeftOutlined />}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0px',
+                zIndex: 1,
+                transform: 'translateY(-50%)',
+                backgroundColor: '#3C2A21',
+                color: 'white',
+                border: 'none',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+              }}
+              onClick={() => {
+                const container = document.getElementById('places-scroll-container');
+                if (container) container.scrollBy({ left: -200, behavior: 'smooth' });
+              }}
+            />
+            <div
+              id="places-scroll-container"
+              style={{
+                display: 'flex',
+                overflowX: 'hidden',
+                gap: '16px',
+                paddingBottom: '8px',
+                scrollBehavior: 'smooth',
+                borderBottom: '2px solid #ddd',
+                whiteSpace: 'nowrap',
+              }}
+              onWheel={(e) => {
+                e.preventDefault();
+                const container = document.getElementById('places-scroll-container');
+                if (container) container.scrollLeft += e.deltaY;
+              }}
+            >
+              {places.map((place) => (
+                <div
+                  key={place.id}
+                  style={{
+                    display: 'inline-block',
+                    width: '150px',
+                  }}
+                >
+                  <Card
+                    hoverable
+                    onClick={() => {
+                      if (selectedPlaces.includes(place.id)) {
+                        setSelectedPlaces((prev) => prev.filter((id) => id !== place.id));
+                      } else {
+                        setSelectedPlaces((prev) => [...prev, place.id]);
+                      }
+                    }}
+                    style={{
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      border: selectedPlaces.includes(place.id)
+                        ? '3px solid #3C2A21'
+                        : '1px solid #d9d9d9',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      borderRadius: '12px',
+                      backgroundColor: '#ffffff',
+                      transition: 'transform 0.2s ease-in-out',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  >
+                    <img
+                      src={place.imageData
+                                  ? `data:image/jpeg;base64,${place.imageData}`
+                                  : logo}
+                      alt={place.name}
+                      style={{
+                        width: '80px',
+                        height: '80px',
+                        objectFit: 'cover',
+                        marginBottom: '8px',
+                        borderRadius: '50%',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                      }}
                     />
-                  );
-                })}
-              </DndProvider>
-            </Card>
-          </Col>
-        </Row>
-    </Card>
-  </Col>
+                    <div style={{ fontWeight: 'bold', color: '#3C2A21', fontSize: '14px' }}>{place.name}</div>
+                  </Card>
+                </div>
+              ))}
+            </div>
+            <Button
+              icon={<RightOutlined />}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                right: '0px',
+                zIndex: 1,
+                transform: 'translateY(-50%)',
+                backgroundColor: '#3C2A21',
+                color: 'white',
+                border: 'none',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+              }}
+              onClick={() => {
+                const container = document.getElementById('places-scroll-container');
+                if (container) container.scrollBy({ left: 200, behavior: 'smooth' });
+              }}
+            />
+          </div>
+        </Card>
+      </Col>
+
+      <Col span={24} style={{ maxHeight: '300px', overflow: 'hidden' }}>
+        <Card style={{ background: '#f8f9fa', border: 'none', borderRadius: '12px' }}>
+          <Title level={4} style={{ color: '#3C2A21', fontWeight: 'bold' }}>Seçilen Yerler (Sıralama ve Silme)</Title>
+          <DndProvider backend={HTML5Backend}>
+            <div
+              style={{ maxHeight: '250px', overflow: 'hidden' }}
+              onWheel={(e) => {
+                e.preventDefault();
+                const container = e.currentTarget;
+                container.scrollTop += e.deltaY;
+              }}
+            >
+              {selectedPlaces.map((placeId, index) => {
+                const place = places.find((p) => p.id === placeId);
+                return (
+                  <DraggableListItem
+                    key={placeId}
+                    place={place}
+                    index={index}
+                    movePlace={movePlace}
+                    removePlace={handleRemovePlace}
+                  />
+                );
+              })}
+            </div>
+          </DndProvider>
+        </Card>
+      </Col>
+    </Row>
+  </Card>
+</Col>
+
+
+
 
   <Col span={4}>
     <Button
