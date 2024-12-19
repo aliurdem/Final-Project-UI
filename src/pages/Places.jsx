@@ -3,6 +3,9 @@ import axios from 'axios';
 import { message, Modal } from 'antd';
 import { HeartOutlined, HeartFilled } from '@ant-design/icons';
 import { UserContext } from '../components/HomePage/UserContext';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+
+
 
 const Places = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,6 +14,13 @@ const Places = () => {
   const [selectedPlace, setSelectedPlace] = useState(null); // Seçilen yer için state
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal görünürlüğü için state
   const { isLoggedIn } = useContext(UserContext);
+
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyADKPpfCt1tyPc9N9UN3sWZOMKQKYCclbU';
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+  });
+
 
   useEffect(() => {
     // Yerleri API'den çek
@@ -234,83 +244,110 @@ const Places = () => {
 
       {/* Modal */}
       {selectedPlace && (
-        <Modal
-          open={isModalVisible}
-          footer={null}
-          width={'60%'}
-          onCancel={closeModal}
-          bodyStyle={{
-            backgroundColor: '#F6EFE9',
-            borderRadius: '20px',
-            padding: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', width: '100%' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <img
-                alt={selectedPlace.name}
-                src={selectedPlace.image}
-                style={{
-                  width: '280px',
-                  height: '380px',
-                  borderRadius: '12px',
-                  objectFit: 'cover',
-                }}
-              />
-              {isLoggedIn && (
-                <div
-                  onClick={() => toggleFavorite(selectedPlace.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginTop: '10px',
-                    cursor: 'pointer',
-                    color: isFavorite(selectedPlace.id) ? '#ff4d4f' : '#493628',
-                    fontWeight: '500',
-                  }}
-                >
-                  {isFavorite(selectedPlace.id) ? <HeartFilled /> : <HeartOutlined />}
-                  <span>
-                    {isFavorite(selectedPlace.id) ? 'Favorilerden Kaldır' : 'Favorilere Ekle'}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div
-              style={{
-                flex: 1,
-                backgroundColor: '#FDF8F4',
-                borderRadius: '10px',
-                padding: '15px',
-                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-              }}
-            >
-              <h2 style={{ color: '#493628', marginBottom: '10px' }}>{selectedPlace.name}</h2>
-              <p style={{ color: '#493628', fontSize: '16px', lineHeight: '1.5' }}>
-                {selectedPlace.description}
-              </p>
-              <ul style={{ color: '#493628', fontSize: '14px', listStyle: 'none', padding: 0, marginTop: '20px' }}>
-                <li>
-                  <span style={{ marginRight: '8px', fontWeight: 'bold' }}>📍</span>
-                  Konum: {selectedPlace.locationInfo}
-                </li>
-                <li>
-                  <span style={{ marginRight: '8px', fontWeight: 'bold' }}>⏰</span>
-                  Ziyaret Saatleri: {selectedPlace.visitableHours}
-                </li>
-                <li>
-                  <span style={{ marginRight: '8px', fontWeight: 'bold' }}>💰</span>
-                  Giriş Ücreti: {selectedPlace.entranceFee}
-                </li>
-              </ul>
-            </div>
+      <Modal
+      open={isModalVisible}
+      footer={null}
+      width={'70%'}
+      onCancel={closeModal}
+      bodyStyle={{
+        backgroundColor: '#fff',
+        borderRadius: '20px',
+        padding: '20px',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        maxHeight: '80vh',
+        overflowY: 'auto',
+      }}
+    >
+      <h2 style={{ color: '#333', marginBottom: '10px', fontSize: '24px', fontWeight: 'bold' }}>{selectedPlace.name}</h2>
+      <p style={{ color: '#555', fontSize: '16px', lineHeight: '1.6', textAlign: 'center' }}>{selectedPlace.description}</p>
+      <ul
+        style={{
+          color: '#555',
+          fontSize: '14px',
+          listStyle: 'none',
+          padding: 0,
+          marginTop: '15px',
+          marginBottom: '20px',
+          width: '100%',
+          textAlign: 'left',
+        }}
+      >
+        <li>
+          <span style={{ marginRight: '8px', fontWeight: 'bold' }}>📍</span>
+          Konum: {selectedPlace.locationInfo}
+        </li>
+        <li>
+          <span style={{ marginRight: '8px', fontWeight: 'bold' }}>⏰</span>
+          Ziyaret Saatleri: {selectedPlace.visitableHours}
+        </li>
+        <li>
+          <span style={{ marginRight: '8px', fontWeight: 'bold' }}>💰</span>
+          Giriş Ücreti: {selectedPlace.entranceFee}
+        </li>
+      </ul>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '10px',
+          marginTop: '10px',
+        }}
+      >
+        {isLoggedIn && (
+          <div
+            onClick={() => toggleFavorite(selectedPlace.id)}
+            style={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '16px',
+              color: isFavorite(selectedPlace.id) ? '#ff4d4f' : '#555',
+            }}
+          >
+            {isFavorite(selectedPlace.id) ? <HeartFilled /> : <HeartOutlined />}
+            <span>
+              {isFavorite(selectedPlace.id) ? 'Favorilerden Kaldır' : 'Favorilere Ekle'}
+            </span>
           </div>
-        </Modal>
+        )}
+      </div>
+      <div
+        style={{
+          width: '100%',
+          height: '400px',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+          marginTop: '20px',
+        }}
+      >
+          <GoogleMap
+            mapContainerStyle={{
+              width: '100%',
+              height: '100%',
+            }}
+            
+            center={{
+              lat: 41.6647069,
+              lng: 26.5796547,
+            }}
+            zoom={15}
+          >
+            
+            <Marker
+              position={{
+                lat: 41.6647069,
+                lng: 26.5796547,
+              }}
+            />
+          </GoogleMap>
+      </div>
+    </Modal>
       )}
     </div>
   );
