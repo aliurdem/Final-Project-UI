@@ -43,9 +43,6 @@ const AppBar = () => {
       <Menu.Item key="2" onClick={() => handleButtonClick('/my-routes')}>
         Rotalarım
       </Menu.Item>
-      <Menu.Item key="3" onClick={() => handleButtonClick('/admin-panel')}>
-        Admin Paneli
-      </Menu.Item>
       <Menu.Divider />
       <Menu.Item key="4" danger onClick={handleLogout}>
         Çıkış Yap
@@ -62,8 +59,8 @@ const AppBar = () => {
       <div style={navContainerStyle}>
         <button onClick={() => handleButtonClick('/')} style={buttonStyle}>Anasayfa</button>
         <button onClick={() => handleButtonClick('/our-routes')} style={buttonStyle}>Gezi Rotalarımız</button>
-        <button onClick={() => handleButtonClick('/about')} style={buttonStyle}>Biz Kimiz?</button>
         <button onClick={() => handleButtonClick('/places')} style={buttonStyle}>Gezilecek Yerler</button>
+        <button onClick={() => handleButtonClick('/about')} style={buttonStyle}>Biz Kimiz?</button>
 
         {isLoggedIn ? (
           <Dropdown overlay={menu} trigger={['click']}>

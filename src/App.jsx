@@ -10,9 +10,15 @@ import OurRoutes from './pages/OurRoutes';
 import AdminPanel from './pages/AdminPanel';
 import Favorites from './pages/Favorites';
 import NewRoutes from './pages/NewRoutes';
+import NewPlaces from './pages/NewPlaces';
+import AccessDenied from './pages/Denied';
+import ProtectedRoute from './components/HomePage/ProtectedRoute';
+
 import Places from './pages/Places';
 import { UserProvider } from './components/HomePage/UserContext';
 import AppBar from './components/HomePage/AppBar';
+import { GoogleMapsProvider } from './components/HomePage/GoogleMapProvider';
+import MyRoutes from './pages/MyRoutes';
 
 const { Content } = Layout;
 
@@ -31,6 +37,15 @@ const LayoutWithAppBar = () => {
       {!hideAppBar && <AppBar />} {/* Koşullu AppBar */}
       <Content>
         <Routes>
+         <Route
+            path="/admin-panel"
+            element={
+              <ProtectedRoute requiredRole="Admin">
+                <AdminPanel />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -40,7 +55,10 @@ const LayoutWithAppBar = () => {
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/new-routes" element={<NewRoutes />} />
+          <Route path="/my-routes" element={<MyRoutes />} />
           <Route path="/places" element={<Places />} />
+          <Route path='/new-places' element={<NewPlaces />}></Route>
+          <Route path="/denied" element={<AccessDenied />} />
         </Routes>
       </Content>
     </Layout>
@@ -50,11 +68,13 @@ const LayoutWithAppBar = () => {
 function App() {
   return (
     <UserProvider>
+        <GoogleMapsProvider>
       <Router>
         <LayoutWithAppBar />
       </Router>
+      </GoogleMapsProvider>
+
     </UserProvider>
   );
 }
-
 export default App;

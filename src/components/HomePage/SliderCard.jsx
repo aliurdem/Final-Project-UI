@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Modal, message } from 'antd';
 import axios from 'axios';
 import logo from '/edirnelogorenkli.png'; // Placeholder image
-import { HeartOutlined, HeartFilled } from '@ant-design/icons'; // Ant Design simgeleri
+import { HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { GoogleMap, MarkerF } from '@react-google-maps/api';
 
 const SliderCard = ({
   placeId,
@@ -11,6 +12,8 @@ const SliderCard = ({
   locationInfo,
   visitableHours,
   entranceFee,
+  latitude,
+  longitude,
   imageData,
   isLoggedIn,
 }) => {
@@ -115,7 +118,7 @@ const SliderCard = ({
       </div>
 
       {/* İçerik */}
-      <div style={contentStyle}>
+      <div style={contentStyle} onClick={() => setIsModalVisible(true)}>
         <h3 style={titleStyle}>{placeName}</h3>
         <p style={descriptionStyle}>{description}</p>
         <div style={infoStyle}>
@@ -142,6 +145,29 @@ const SliderCard = ({
         <p>📍 {locationInfo}</p>
         <p>⏰ {visitableHours}</p>
         <p>💰 {entranceFee}</p>
+
+        {/* Harita */}
+        <div style={{ width: '100%', height: '400px', marginTop: '20px' }}>
+          <GoogleMap
+            mapContainerStyle={{
+              width: '100%',
+              height: '100%',
+              borderRadius: '12px',
+            }}
+            center={{
+              lat: latitude,
+              lng: longitude,
+            }}
+            zoom={15}
+          >
+            <MarkerF
+              position={{
+                lat: latitude,
+                lng: longitude,
+              }}
+            />
+          </GoogleMap>
+        </div>
       </Modal>
     </div>
   );

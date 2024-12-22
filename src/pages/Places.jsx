@@ -1,55 +1,48 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { message, Modal } from 'antd';
-import { HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { message, Modal, Button, Form, Input, Upload } from 'antd';
+import { UploadOutlined, HeartOutlined, HeartFilled, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { UserContext } from '../components/HomePage/UserContext';
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-
-
+import PlaceCardModal from '../components/HomePage/PlaceCardModel';
+import PlaceEditSaveCardModal from '../components/HomePage/PlaceEditSaveCardModal';
 
 const Places = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [places, setPlaces] = useState([]);
   const [favList, setFavList] = useState([]);
-  const [selectedPlace, setSelectedPlace] = useState(null); // Seçilen yer için state
-  const [isModalVisible, setIsModalVisible] = useState(false); // Modal görünürlüğü için state
-  const { isLoggedIn } = useContext(UserContext);
-
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyADKPpfCt1tyPc9N9UN3sWZOMKQKYCclbU';
-
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-  });
-
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [file, setFile] = useState(null);
+  const [modalForm] = Form.useForm();
+  const { isLoggedIn, roles } = useContext(UserContext);
 
   useEffect(() => {
-    // Yerleri API'den çek
-    axios.get('https://localhost:7263/Place/GetAll')
-      .then(response => {
-        const apiData = response.data.data || [];
-        const transformedData = apiData.map(item => ({
-          ...item,
-          image: item.imageData 
-            ? `data:image/jpeg;base64,${item.imageData}` 
-            : './erikli.png'
-        }));
-        setPlaces(transformedData);
-      })
-      .catch(error => {
-        console.error("Veri çekme hatası:", error);
-      });
+    fetchPlaces();
 
-    // Favori listesini localStorage'dan yükle
     const storedFavList = JSON.parse(localStorage.getItem('userFavList')) || [];
     setFavList(storedFavList);
   }, []);
 
-  // Favori kontrol fonksiyonu
-  const isFavorite = (placeId) => {
-    return favList.some((fav) => fav.placeId === placeId);
+  const fetchPlaces = async () => {
+    try {
+      const response = await axios.get('https://localhost:7263/Place/GetAll');
+      const apiData = response.data.data || [];
+      const transformedData = apiData.map(item => ({
+        ...item,
+        image: item.imageData
+          ? `data:image/jpeg;base64,${item.imageData}`
+          : './erikli.png'
+      }));
+      setPlaces(transformedData);
+    } catch (error) {
+      console.error("Veri çekme hatası:", error);
+    }
   };
 
-  // Favori ekleme/kaldırma
+  const isFavorite = (placeId) => favList.some((fav) => fav.placeId === placeId);
+
   const toggleFavorite = async (placeId) => {
     if (!isLoggedIn) return;
     if (isFavorite(placeId)) {
@@ -99,23 +92,119 @@ const Places = () => {
     }
   };
 
-  // Modal kontrol
-  const openModal = (place) => {
+  const handleDelete = (placeId) => {
+    Modal.confirm({
+      title: 'Silme Onayı',
+      content: 'Bu yeri silmek istediğinize emin misiniz?',
+      okText: 'Evet',
+      cancelText: 'Hayır',
+      onOk: async () => {
+        try {
+          const response = await axios.delete(`https://localhost:7263/Place/${placeId}`, {
+            withCredentials: true
+          });
+
+          if (response.status === 200) {
+            const updatedPlaces = places.filter(place => place.id !== placeId);
+            setPlaces(updatedPlaces);
+            message.success('Yer başarıyla silindi!');
+          }
+        } catch (error) {
+          console.error("Silme hatası:", error);
+          message.error('Silme işlemi sırasında bir hata oluştu.');
+        }
+      }
+    });
+  };
+
+  const openModal = (place = null) => {
     setSelectedPlace(place);
+    setIsEditMode(!!place);
+    setFile(null);
+    if (place) {
+      modalForm.setFieldsValue(place);
+    } else {
+      modalForm.resetFields();
+    }
     setIsModalVisible(true);
   };
 
   const closeModal = () => {
     setSelectedPlace(null);
+    setFile(null);
+    modalForm.resetFields(); 
     setIsModalVisible(false);
   };
 
+  const openDetailModal = (place = null) => {
+    setSelectedPlace(place);
+    setIsDetailModalVisible(true);
+  };
+
+  const closeDetailModal = () => {
+    setIsDetailModalVisible(false);
+  };
+
+  const handleEdit = (place) => {
+    openModal(place);
+  };
+
+  const handleSave = async (values) => {
+    const endpoint = isEditMode
+      ? `https://localhost:7263/Place`
+      : 'https://localhost:7263/Place';
+    const method = isEditMode ? 'patch' : 'post';
+  
+    let imageData = selectedPlace?.imageData || ''; // Mevcut imageData'yı kullan
+  
+    if (file) {
+      try {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        imageData = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = (error) => reject(error);
+        });
+      } catch (error) {
+        console.error("Resim işleme hatası:", error);
+        message.error("Resim işlenirken bir hata oluştu.");
+        return;
+      }
+    }
+  
+    try {
+      const response = await axios[method](
+        endpoint,
+        {
+          ...values,
+          id: selectedPlace?.id || 0,
+          imageData, // Güncel veya mevcut imageData
+        },
+        { withCredentials: true }
+      );
+  
+      if (response.status === 200 || response.status === 201) {
+        message.success(`Yer başarıyla ${isEditMode ? 'güncellendi' : 'oluşturuldu'}!`);
+        await fetchPlaces(); // Listeyi yeniden çek
+        closeModal();
+      }
+    } catch (error) {
+      console.error(`${isEditMode ? 'Güncelleme' : 'Ekleme'} hatası:`, error);
+      message.error(`Yer ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu.`);
+    }
+  };
+  
+  
+  
+
+  const isAdmin = () => roles.includes('Admin');
+
   const filteredPlaces = places.filter(place =>
-    place.name.toLowerCase().includes(searchTerm.toLowerCase())
+    place.name?.toLowerCase().includes(searchTerm?.toLowerCase() || '')
   );
 
   return (
-    <div 
+    <div
       style={{
         margin: 0,
         padding: 0,
@@ -128,69 +217,81 @@ const Places = () => {
       }}
     >
       {/* Header */}
-      <div 
-        style={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+      <div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    padding: '10px 20px',
+    backgroundColor: '#493628',
+  }}
+>
+  {/* Sol Kısım: Başlık ve Arama Çubuğu */}
+  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+    <h1
+      style={{
+        color: '#fff',
+        fontSize: '28px',
+        margin: 0,
+        fontFamily: 'Lobster, sans-serif',
+      }}
+    >
+      Gezi Lokasyonları
+    </h1>
+
+    {/* Arama Alanı */}
+    <div style={{ position: 'relative', width: '300px' }}>
+      <input
+        type="text"
+        placeholder="Gezilecek yer ara..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
           width: '100%',
-          padding: '5px 0',
-          backgroundColor: '#493628',
+          padding: '10px 40px 10px 15px',
+          borderRadius: '8px',
+          border: '1px solid #ccc',
+          outline: 'none',
+          fontSize: '14px',
+          backgroundColor: 'transparent',
+        }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          right: '15px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          color: '#493628',
         }}
       >
-        <h1 style={{ 
-          color: '#fff',
-          fontSize: '28px', 
-          margin: 0,
-          fontFamily: 'Lobster, sans-serif'
-        }}>
-          Gezi Lokasyonları
-        </h1>
+        🔍
+      </span>
+    </div>
+  </div>
 
-        {/* Arama Alanı */}
-        <div 
-          style={{
-            marginTop: '10px',
-            display: 'flex',
-            justifyContent: 'center',
-            width: '100%',
-            padding: '0 20px'
-          }}
-        >
-          <div style={{ position: 'relative', width: '300px' }}>
-            <input 
-              type="text"
-              placeholder="Gezilecek yer ara..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 40px 10px 15px',
-                borderRadius: '8px',
-                border: '1px solid #ccc',
-                outline: 'none',
-                fontSize: '14px',
-                backgroundColor: 'transparent',
-              }}
-            />
-            <span style={{
-              position: 'absolute',
-              right: '15px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#493628'
-            }}>🔍</span>
-          </div>
-        </div>
-      </div>
+  {/* Sağ Kısım: Yeni Yer Ekle Butonu */}
+  
+  {isAdmin() && (
+    <Button
+      type="primary"
+      icon={<PlusOutlined />}
+      style={{ marginLeft: 'auto' }}
+      onClick={() => openModal()}
+    >
+      Yeni Yer Ekle
+    </Button>
+  )}
+</div>
+
 
       {/* Kartlar Grid */}
-      <div 
+      <div
         style={{
           flex: 1,
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(6, 1fr)',
           gap: '10px',
           margin: '10px',
           padding: '10px',
@@ -198,8 +299,8 @@ const Places = () => {
         }}
       >
         {filteredPlaces.map(place => (
-          <div 
-            key={place.id} 
+          <div
+            key={place.id}
             style={{
               borderRadius: '8px',
               overflow: 'hidden',
@@ -211,22 +312,22 @@ const Places = () => {
               flexDirection: 'column',
               justifyContent: 'flex-end'
             }}
-            onClick={() => openModal(place)}
+            onClick={() => openDetailModal(place)}
           >
-            <img 
-              src={place.image} 
-              alt={place.name} 
+            <img
+              src={place.image}
+              alt={place.name}
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover', 
+                objectFit: 'cover',
                 display: 'block',
                 position: 'absolute',
                 top: 0,
                 left: 0
               }}
             />
-            <div 
+            <div
               style={{
                 position: 'relative',
                 background: 'rgba(0,0,0,0.4)',
@@ -238,116 +339,101 @@ const Places = () => {
             >
               {place.name}
             </div>
+
+            {/* Admin İşlemleri */}
+            {isAdmin() && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '40px',
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0 10px',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                  borderTopLeftRadius: '8px',
+                  borderTopRightRadius: '8px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#52c41a',
+                    borderRadius: '4px',
+                    padding: '8px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(place);
+                  }}
+                >
+                  <EditOutlined style={{ color: '#fff', fontSize: '16px' }} />
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#ff4d4f',
+                    borderRadius: '4px',
+                    padding: '8px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(place.id);
+                  }}
+                >
+                  <DeleteOutlined style={{ color: '#fff', fontSize: '16px' }} />
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
 
       {/* Modal */}
+      <PlaceEditSaveCardModal
+        isVisible={isModalVisible}
+        onClose={closeModal}
+        onSave={() => {
+          modalForm.validateFields().then(handleSave).catch((error) => {
+            console.error('Doğrulama hatası:', error);
+          });
+        }}
+        form={modalForm}
+        initialValues={{
+          id: selectedPlace?.id || 0,
+          name: selectedPlace?.name || '',
+          description: selectedPlace?.description || '',
+          latitude: selectedPlace?.latitude || 0,
+          longitude: selectedPlace?.longitude || 0,
+          visitableHours: selectedPlace?.visitableHours || '',
+          entranceFee: selectedPlace?.entranceFee || 0,
+          imageData: selectedPlace?.imageData || '',
+        }}
+        isEditMode={isEditMode}
+        setFile={setFile}
+        file={file}
+        selectedPlace={selectedPlace}
+      />
+
       {selectedPlace && (
-      <Modal
-      open={isModalVisible}
-      footer={null}
-      width={'70%'}
-      onCancel={closeModal}
-      bodyStyle={{
-        backgroundColor: '#fff',
-        borderRadius: '20px',
-        padding: '20px',
-        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        maxHeight: '80vh',
-        overflowY: 'auto',
-      }}
-    >
-      <h2 style={{ color: '#333', marginBottom: '10px', fontSize: '24px', fontWeight: 'bold' }}>{selectedPlace.name}</h2>
-      <p style={{ color: '#555', fontSize: '16px', lineHeight: '1.6', textAlign: 'center' }}>{selectedPlace.description}</p>
-      <ul
-        style={{
-          color: '#555',
-          fontSize: '14px',
-          listStyle: 'none',
-          padding: 0,
-          marginTop: '15px',
-          marginBottom: '20px',
-          width: '100%',
-          textAlign: 'left',
-        }}
-      >
-        <li>
-          <span style={{ marginRight: '8px', fontWeight: 'bold' }}>📍</span>
-          Konum: {selectedPlace.locationInfo}
-        </li>
-        <li>
-          <span style={{ marginRight: '8px', fontWeight: 'bold' }}>⏰</span>
-          Ziyaret Saatleri: {selectedPlace.visitableHours}
-        </li>
-        <li>
-          <span style={{ marginRight: '8px', fontWeight: 'bold' }}>💰</span>
-          Giriş Ücreti: {selectedPlace.entranceFee}
-        </li>
-      </ul>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '10px',
-          marginTop: '10px',
-        }}
-      >
-        {isLoggedIn && (
-          <div
-            onClick={() => toggleFavorite(selectedPlace.id)}
-            style={{
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '16px',
-              color: isFavorite(selectedPlace.id) ? '#ff4d4f' : '#555',
-            }}
-          >
-            {isFavorite(selectedPlace.id) ? <HeartFilled /> : <HeartOutlined />}
-            <span>
-              {isFavorite(selectedPlace.id) ? 'Favorilerden Kaldır' : 'Favorilere Ekle'}
-            </span>
-          </div>
-        )}
-      </div>
-      <div
-        style={{
-          width: '100%',
-          height: '400px',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-          marginTop: '20px',
-        }}
-      >
-          <GoogleMap
-            mapContainerStyle={{
-              width: '100%',
-              height: '100%',
-            }}
-            
-            center={{
-              lat: 41.6647069,
-              lng: 26.5796547,
-            }}
-            zoom={15}
-          >
-            
-            <Marker
-              position={{
-                lat: 41.6647069,
-                lng: 26.5796547,
-              }}
-            />
-          </GoogleMap>
-      </div>
-    </Modal>
+        <PlaceCardModal
+          isVisible={isDetailModalVisible}
+          onClose={closeDetailModal}
+          item={selectedPlace}
+          isFav={isFavorite(selectedPlace.id)}
+          toggleFav={() => toggleFavorite(selectedPlace.id)}
+          isLoggedIn={isLoggedIn}
+        />
       )}
     </div>
   );

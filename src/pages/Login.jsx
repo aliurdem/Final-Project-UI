@@ -10,7 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Context'ten setIsLoggedIn ve setEmail fonksiyonlarını alıyoruz
-  const { setIsLoggedIn, setEmail } = useContext(UserContext);
+  const { setIsLoggedIn, setEmail,setRoles } = useContext(UserContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,10 +41,13 @@ const Login = () => {
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('email', userData.email || 'Belirtilmemiş');
           localStorage.setItem('userId', userId || 'Bilinmiyor');
+          localStorage.setItem('roles', JSON.stringify(userData.roles)); // Rolleri JSON.stringify ile kaydet
 
           // Context de güncelle
           setIsLoggedIn(true);
           setEmail(userData.email || 'Belirtilmemiş');
+          setRoles(userData.roles); // Context'e roller ekleniyor
+
 
           // Kullanıcının favorilerini almak için istek at
           const favListResponse = await fetch('https://localhost:7263/UserFav/GetList', {
@@ -100,6 +103,16 @@ const Login = () => {
     }, 100);
   };
 
+  const handleAdminLogin = () => {
+    // Test bilgilerini doldur ve formu gönder
+    setUsername('Admin1@example.com');
+    setPassword('Admin1@example.com');
+    // Formu otomatik gönder
+    setTimeout(() => {
+      document.getElementById('login-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }, 100);
+  };
+
   return (
     <div className="login-wrapper">
       <div className="login-container">
@@ -130,6 +143,15 @@ const Login = () => {
           style={{ marginTop: '10px', color: '#fff', backgroundColor: '#007bff', border: 'none', padding: '10px', borderRadius: '5px', cursor: 'pointer' }}
         >
           Test Girişi
+        </button>
+        <br>
+        </br>
+        <button
+          className="admin-button"
+          onClick={handleAdminLogin}
+          style={{ marginTop: '10px', color: '#fff', backgroundColor: '#007bff', border: 'none', padding: '10px', borderRadius: '5px', cursor: 'pointer' }}
+        >
+          Admin Girişi
         </button>
 
         <p className="signup-text">

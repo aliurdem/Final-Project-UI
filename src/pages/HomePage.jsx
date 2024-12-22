@@ -9,7 +9,6 @@ const HomePage = () => {
   return (
     <div>
      <BridgeDiscover/>
-     <SearchBox/>
      <Slider/>
      <TravelRoutes/>
      <Footer/>

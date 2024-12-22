@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, Select, Checkbox, Typography, Radio, Upload, message, Input, InputNumber } from 'antd';
+import { Row, Col, Card, Button, Select, Checkbox, Typography, Radio, Upload, message, Input, InputNumber,Modal } from 'antd';
 import { PlusOutlined, ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -9,6 +9,7 @@ import { DeleteOutlined } from '@ant-design/icons';
 import { LeftOutlined } from '@ant-design/icons';
 import { RightOutlined  } from '@ant-design/icons';
 import logo from '/edirnelogorenkli.png'; // Placeholder image
+import { GoogleMap, DirectionsRenderer,MarkerF } from '@react-google-maps/api';
 
 
 const { Title } = Typography;
@@ -26,10 +27,61 @@ const NewRoutes = () => {
   const [minutes, setMinutes] = useState(0);
   const [uploadedImage, setUploadedImage] = useState(null);
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+  
+
   // Axios yapılandırması
   axios.defaults.withCredentials = true;
 
   const type = 'PLACE_ITEM';
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleMapButtonClick = () => {
+    calculateRoute(selectedPlaces)
+    setIsModalVisible(true);
+  };
+
+  const calculateRoute = async (places) => {
+    const directionsService = new google.maps.DirectionsService();
+    const sortedPlaces = [...places].sort((a, b) => a.sequence - b.sequence);
+
+    const origin = {
+      lat: sortedPlaces[0].latitude,
+      lng: sortedPlaces[0].longitude,
+    };
+
+    const destination = {
+      lat: sortedPlaces[sortedPlaces.length - 1].latitude,
+      lng: sortedPlaces[sortedPlaces.length - 1].longitude,
+    };
+
+    const waypoints = sortedPlaces.slice(1, -1).map((place) => ({
+      location: { lat: place.latitude, lng: place.longitude },
+      stopover: true,
+        
+    }));
+
+    directionsService.route(
+      {
+        origin,
+        destination,
+        waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+          setDirectionsResponse(result);
+        } else {
+          console.error('Directions API hatası:', status);
+        }
+      }
+    );
+  };
 
 const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
   const [{ isDragging }, dragRef] = useDrag({
@@ -50,6 +102,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
     },
   });
 
+  
   return (
     <div
       ref={(node) => dragRef(dropRef(node))}
@@ -432,10 +485,6 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
     </Row>
   </Card>
 </Col>
-
-
-
-
   <Col span={4}>
     <Button
       type="primary"
@@ -447,10 +496,60 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
       Rotayı Oluştur
     </Button>
   </Col>
-</Row>
 
-        
-      
+</Row>
+<Modal
+        visible={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width="80%"
+        centered
+        bodyStyle={{
+          padding: '20px',
+          backgroundColor: '#f9f9f9',
+          borderRadius: '12px',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        {loading ? (
+          <Spin size="large" style={{ display: 'block', margin: '0 auto' }} />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div
+              style={{
+                width: '100%',
+                height: '400px',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              <GoogleMap
+                mapContainerStyle={{ width: '100%', height: '100%' }}
+                center={{
+                  lat: selectedPlaces[0]?.latitude || 41.6624608,
+                  lng: selectedPlaces[0]?.longitude || 26.265514,
+                }}
+                zoom={12}
+              >
+                {directionsResponse && (
+                  <DirectionsRenderer directions={directionsResponse} />
+                )}
+                {directionsResponse &&
+                  directionsResponse.routes[0].legs.map((leg, index) => (
+                    <MarkerF
+                      key={index}
+                      position={{
+                        lat: leg.start_location.lat(),
+                        lng: leg.start_location.lng(),
+                      }}
+                    />
+                  ))}
+              </GoogleMap>
+            </div>
+          </div>
+        )}
+      </Modal>
       </div>
     </div>
   );

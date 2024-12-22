@@ -8,7 +8,7 @@ import './ourRoutes.css';
 
 const { Header } = Layout;
 
-const OurRoutes = () => {
+const MyRoutes = () => {
   const [categories, setCategories] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [selectedRoute, setSelectedRoute] = useState(null);
@@ -20,12 +20,15 @@ const OurRoutes = () => {
 
   const fetchAllRoutes = async () => {
     try {
-      const response = await fetch('https://localhost:7263/TravelRoute/GetAll');
+      const response = await fetch('https://localhost:7263/TravelRoute/GetListForUser', {
+        method: 'GET',
+        credentials: 'include', // Include cookies in the request
+      });
       const result = await response.json();
-      if (result.success) {
-        setRoutes(result.data);
+      if (result && Array.isArray(result)) {
+        setRoutes(result);
       } else {
-        console.error('Rotalar alınırken hata oluştu:', result.message);
+        console.error('Rotalar alınırken hata oluştu:', result);
         setRoutes([]);
       }
     } catch (error) {
@@ -120,33 +123,28 @@ const OurRoutes = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f4f4f4' }}>
-      <Header style={{ background: '#493628', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      
-  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-    <h1
-      style={{
-        color: '#fff',
-        fontSize: '28px',
-        margin: 0,
-        fontFamily: 'Lobster, sans-serif',
-      }}
-    >
-      Gezi Rotaları
-    </h1>
-  </div>
-  {isLoggedIn && (
-    <Button
-      onClick={() => navigate('/new-routes')}
-      style={{ color: '#fff', backgroundColor: '#4CAF50', border: 'none' }}
-    >
-      Yeni Rota Oluştur
-    </Button>
-  )}
-</Header>
+      <Header style={{ background: '#493628', padding: '0 16px' }}>
+        <Button
+          icon={<ArrowLeftOutlined />}
+          onClick={() => navigate('/')}
+          style={{ color: '#fff', backgroundColor: '#AB886D', border: 'none' }}
+        >
+          Geri
+        </Button>
+        {isLoggedIn && (
+          <Button
+            onClick={() => navigate('/new-routes')}
+            style={{ color: '#fff', backgroundColor: '#4CAF50', border: 'none' }}
+          >
+            Yeni Rota Oluştur
+          </Button>
+        )}
+        <div style={{ color: '#fff', fontSize: '24px', fontWeight: 'bold' }}>Gezi Rotalarımız</div>
+      </Header>
       <div style={{ padding: '20px' }}>
         <Row gutter={[16, 16]}>
           {routes.map((route) => (
-            <Col span={4} key={route.id}>
+            <Col span={6} key={route.id}>
               <Card
                 title={route.name}
                 onClick={() => handleCardClick(route.id)}
@@ -300,4 +298,4 @@ const OurRoutes = () => {
   );
 };
 
-export default OurRoutes;
+export default MyRoutes;
