@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Button, Select, Checkbox, Typography, Radio, Upload, message, Input, InputNumber,Modal,Switch,Spin  } from 'antd';
 import { PlusOutlined, ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useParams  } from 'react-router-dom';
 import axios from 'axios';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -17,8 +17,10 @@ import { HeartFilled, HeartOutlined } from '@ant-design/icons';
 const { Title } = Typography;
 
 
-const NewRoutes = () => {
+const EditRoute = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const numericId = Number(id);
   const [routeName, setRouteName] = useState('');
   const [selectionType, setSelectionType] = useState(null);
   const [routeType, setRouteType] = useState(null);
@@ -172,44 +174,69 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
   );
 };
 
-  useEffect(() => {
+useEffect(() => {
+    // Modal açık olduğunda sadece rota hesapla
     if (isModalVisible) {
       calculateRoute();
     }
+  }, [isModalVisible]);
 
-    const loadFavorites = () => {
-      const favoriteData = localStorage.getItem('userFavList');
-      if (favoriteData) {
-        setFavorites(JSON.parse(favoriteData));
+ useEffect(() => {
+  // İlk yüklemede gerekli verileri al
+  const loadFavorites = () => {
+    const favoriteData = localStorage.getItem('userFavList');
+    if (favoriteData) {
+      setFavorites(JSON.parse(favoriteData));
+    }
+  };
+
+  const fetchRouteDetails = async () => {
+    try {
+      const { data } = await axios.get(`https://localhost:7263/TravelRoute/${numericId}`);
+      if (data) {
+        setRouteName(data.name);
+        setRouteType(data.categoryId);
+        setUploadedImage(data.imageData ? `data:image/jpeg;base64,${data.imageData}` : null);
+        const [routeHours, routeMinutes] = data.averageDuration.split(':').map(Number);
+        setHours(routeHours);
+        setMinutes(routeMinutes);
+        setSelectedPlaces(data.places);
+      } else {
+        message.error('Rota bilgileri yüklenirken hata oluştu.');
       }
-    };
+    } catch (error) {
+      console.error('Rota bilgileri alınırken hata:', error);
+      message.error('Rota bilgileri yüklenirken bir hata oluştu.');
+    }
+  };
 
-    const fetchCategories = async () => {
-      try {
-        const { data } = await axios.get('https://localhost:7263/Category/GetAll');
-        if (data.success) setCategories(data.data);
-        else message.error('Kategoriler yüklenirken hata oluştu.');
-      } catch (error) {
-        console.error('Kategori verisi alınırken hata:', error);
-        message.error('Kategoriler yüklenirken bir hata oluştu.');
-      }
-    };
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get('https://localhost:7263/Category/GetAll');
+      if (data.success) setCategories(data.data);
+      else message.error('Kategoriler yüklenirken hata oluştu.');
+    } catch (error) {
+      console.error('Kategori verisi alınırken hata:', error);
+      message.error('Kategoriler yüklenirken bir hata oluştu.');
+    }
+  };
 
-    const fetchPlaces = async () => {
-      try {
-        const { data } = await axios.get('https://localhost:7263/Place/GetAll');
-        if (data.success) setPlaces(data.data);
-        else message.error('Yerler yüklenirken hata oluştu.');
-      } catch (error) {
-        console.error('Yer verisi alınırken hata:', error);
-        message.error('Yerler yüklenirken bir hata oluştu.');
-      }
-    };
+  const fetchPlaces = async () => {
+    try {
+      const { data } = await axios.get('https://localhost:7263/Place/GetAll');
+      if (data.success) setPlaces(data.data);
+      else message.error('Yerler yüklenirken hata oluştu.');
+    } catch (error) {
+      console.error('Yer verisi alınırken hata:', error);
+      message.error('Yerler yüklenirken bir hata oluştu.');
+    }
+  };
 
-    fetchCategories();
-    fetchPlaces();
-    loadFavorites();
-  }, [isModalVisible, selectedPlaces]);
+  fetchCategories();
+  fetchPlaces();
+  fetchRouteDetails();
+  loadFavorites();
+}, []); 
 
   const filteredPlaces = showFavorites
   ? places.filter((place) =>
@@ -251,7 +278,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
     }));
 
     const payload = {
-      id: 0,
+      id: numericId,
       name: routeName,
       userId: '',
       averageDuration: averageDuration,
@@ -261,20 +288,20 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
     };
 
     try {
-      const response = await axios.post('https://localhost:7263/TravelRoute', payload, {
+      const response = await axios.patch('https://localhost:7263/TravelRoute', payload, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.status === 200 || response.data.success) {
-        message.success('Rota başarıyla oluşturuldu!');
-        navigate('/our-routes');
+        message.success('Rota başarıyla düzenlendi!');
+        navigate('/my-routes');
       } else {
-        message.error('Rota oluşturulurken hata oluştu.');
+        message.error('Rota düzenlenirken hata oluştu.');
       }
     } catch (error) {
-      console.error('Rota oluşturulurken hata:', error.response?.data || error.message);
-      message.error('Rota oluşturulurken bir hata oluştu.');
+      console.error('Rota düzenlenirken hata:', error.response?.data || error.message);
+      message.error('Rota düzenlenirken bir hata oluştu.');
     }
   };
 
@@ -305,7 +332,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
 
       <div style={{ padding: '24px' }}>
         <Title level={2} style={{ textAlign: 'center', color: '#3C2A21', fontFamily: 'Lobster, sans-serif' }}>
-          Yeni Rota Oluştur
+          Rota Düzenle
         </Title>
         <Row gutter={[16, 16]} align="stretch">
   <Col span={12}>
@@ -600,7 +627,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
       style={{ backgroundColor: '#3C2A21', color: 'white', height: '100%' }}
       onClick={handleCreateRoute}
     >
-      Rotayı Oluştur
+      Kaydet
     </Button>
     
   </Col>
@@ -712,4 +739,6 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
   );
 };
 
-export default NewRoutes;
+export default EditRoute;
+
+

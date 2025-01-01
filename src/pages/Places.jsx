@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { message, Modal, Button, Form, Input, Upload } from 'antd';
+import { message, Modal, Button, Form, Input, Upload,Switch } from 'antd';
 import { UploadOutlined, HeartOutlined, HeartFilled, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { UserContext } from '../components/HomePage/UserContext';
 import PlaceCardModal from '../components/HomePage/PlaceCardModel';
 import PlaceEditSaveCardModal from '../components/HomePage/PlaceEditSaveCardModal';
+import { Tooltip } from 'antd';
 
 const Places = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,7 +18,7 @@ const Places = () => {
   const [file, setFile] = useState(null);
   const [modalForm] = Form.useForm();
   const { isLoggedIn, roles } = useContext(UserContext);
-
+  const [showFavorites, setShowFavorites] = useState(false);
   useEffect(() => {
     fetchPlaces();
 
@@ -199,9 +200,13 @@ const Places = () => {
 
   const isAdmin = () => roles.includes('Admin');
 
-  const filteredPlaces = places.filter(place =>
-    place.name?.toLowerCase().includes(searchTerm?.toLowerCase() || '')
-  );
+  const filteredPlaces = places.filter((place) => {
+    const isMatch = place.name?.toLowerCase().includes(searchTerm?.toLowerCase() || '');
+    if (showFavorites) {
+      return isMatch && favList.some((fav) => fav.placeId === place.id);
+    }
+    return isMatch;
+  });
 
   return (
     <div
@@ -271,18 +276,34 @@ const Places = () => {
     </div>
   </div>
 
-  {/* Sağ Kısım: Yeni Yer Ekle Butonu */}
-  
+  {/* Sağ Kısım: Yeni Yer Ekle ve Switch */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '20px',padding:"5px" }}>
+ 
+{isLoggedIn && (
+  <Tooltip title={showFavorites ? 'Favorileri Gizle' : 'Favorileri Göster'}>
+    <Switch
+      checked={showFavorites}
+      onChange={(checked) => setShowFavorites(checked)}
+      checkedChildren={<HeartFilled style={{ color: 'red' }} />}
+      unCheckedChildren={<HeartOutlined style={{ color: 'red' }} />}
+      style={{
+        backgroundColor: showFavorites ? '#ffe6f0' : '#f6efe9',
+        border: '1px solid #d9d9d9',
+        boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
+      }}
+    />
+  </Tooltip>
+)}
   {isAdmin() && (
     <Button
       type="primary"
       icon={<PlusOutlined />}
-      style={{ marginLeft: 'auto' }}
       onClick={() => openModal()}
     >
       Yeni Yer Ekle
     </Button>
   )}
+</div>
 </div>
 
 

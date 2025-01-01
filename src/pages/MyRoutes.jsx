@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Layout, Select, Button, Card, Col, Row, Modal, Spin } from 'antd';
-import { ClockCircleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Layout, Select, Button, Card, Col, Row, Modal, Spin,message  } from 'antd';
+import { ClockCircleOutlined, ArrowLeftOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { GoogleMap, DirectionsRenderer,MarkerF } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../components/HomePage/UserContext';
 import './ourRoutes.css';
+import axios from 'axios';
 
 const { Header } = Layout;
 
@@ -35,6 +36,32 @@ const MyRoutes = () => {
       console.error('Rotalar alınırken hata oluştu:', error);
       setRoutes([]);
     }
+  };
+
+  const handleDelete = (routeId) => {
+    Modal.confirm({
+      title: 'Silme Onayı',
+      content: 'Bu rotayı silmek istediğinize emin misiniz?',
+      okText: 'Evet',
+      cancelText: 'Hayır',
+      onOk: async () => {
+        try {
+          const response = await axios.delete(`https://localhost:7263/TravelRoute/${routeId}`, {
+            withCredentials: true, // Kullanıcı kimlik doğrulama bilgilerini ekler
+          });
+  
+          if (response.status === 200) {
+            setRoutes((prevRoutes) => prevRoutes.filter((route) => route.id !== routeId));
+            message.success('Rota başarıyla silindi!');
+          } else {
+            message.error('Silme işlemi sırasında bir hata oluştu.');
+          }
+        } catch (error) {
+          console.error('Silme işlemi hatası:', error);
+          message.error('Silme işlemi sırasında bir hata oluştu.');
+        }
+      },
+    });
   };
 
   const fetchRouteDetails = async (routeId) => {
@@ -145,25 +172,52 @@ const MyRoutes = () => {
         <Row gutter={[16, 16]}>
           {routes.map((route) => (
             <Col span={6} key={route.id}>
-              <Card
-                title={route.name}
-                onClick={() => handleCardClick(route.id)}
-                cover={
-                  route.imageData ? (
-                    <img
-                      alt={route.name}
-                      src={`data:image/jpeg;base64,${route.imageData}`}
-                      style={{ height: '200px', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <div style={{ height: '200px', backgroundColor: '#e0e0e0' }}>Görsel Yok</div>
-                  )
-                }
-              >
-                <p>
-                  <ClockCircleOutlined /> {route.averageDuration || 'Bilgi Yok'}
-                </p>
-              </Card>
+           <Card
+  title={
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span>{route.name}</span>
+      {isLoggedIn && (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={(e) => {
+              e.stopPropagation(); // Propagation'ı durdur
+              navigate(`/edit-route/${route.id}`);
+            }}
+            style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
+          />
+          <Button
+            type="primary"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={(e) => {
+              e.stopPropagation(); // Propagation'ı durdur
+              handleDelete(route.id);
+            }}
+          />
+        </div>
+      )}
+    </div>
+  }
+  onClick={() => handleCardClick(route.id)}
+  cover={
+    route.imageData ? (
+      <img
+        alt={route.name}
+        src={`data:image/jpeg;base64,${route.imageData}`}
+        style={{ height: '200px', objectFit: 'cover' }}
+      />
+    ) : (
+      <div style={{ height: '200px', backgroundColor: '#e0e0e0' }}>Görsel Yok</div>
+    )
+  }
+>
+  <p>
+    <ClockCircleOutlined /> {route.averageDuration || 'Bilgi Yok'}
+  </p>
+</Card>
+
             </Col>
           ))}
         </Row>

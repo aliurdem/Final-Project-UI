@@ -19,6 +19,7 @@ import { UserProvider } from './components/HomePage/UserContext';
 import AppBar from './components/HomePage/AppBar';
 import { GoogleMapsProvider } from './components/HomePage/GoogleMapProvider';
 import MyRoutes from './pages/MyRoutes';
+import EditRoutes from './pages/EditRoute';
 
 const { Content } = Layout;
 
@@ -55,6 +56,7 @@ const LayoutWithAppBar = () => {
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/new-routes" element={<NewRoutes />} />
+          <Route path='/edit-route/:id' element={<EditRoutes />}></Route>
           <Route path="/my-routes" element={<MyRoutes />} />
           <Route path="/places" element={<Places />} />
           <Route path='/new-places' element={<NewPlaces />}></Route>
