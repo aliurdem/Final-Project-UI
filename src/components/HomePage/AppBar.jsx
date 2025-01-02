@@ -6,7 +6,7 @@ import { DownOutlined, UserOutlined } from '@ant-design/icons';
 
 const AppBar = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, logout } = useContext(UserContext);
+  const { isLoggedIn, roles, logout } = useContext(UserContext); // Roller eklendi
   const [error, setError] = useState('');
 
   const handleButtonClick = (path) => {
@@ -37,12 +37,15 @@ const AppBar = () => {
   // Dropdown Menü Elemanları
   const menu = (
     <Menu>
-      <Menu.Item key="1" onClick={() => handleButtonClick('/profile')}>
-        Profilim
-      </Menu.Item>
       <Menu.Item key="2" onClick={() => handleButtonClick('/my-routes')}>
         Rotalarım
       </Menu.Item>
+      {/* Kullanıcı Admin rolüne sahipse "Kategoriler" menü öğesini göster */}
+      {roles.includes('Admin') && (
+        <Menu.Item key="3" onClick={() => handleButtonClick('/category-managment')}>
+          Kategoriler
+        </Menu.Item>
+      )}
       <Menu.Divider />
       <Menu.Item key="4" danger onClick={handleLogout}>
         Çıkış Yap

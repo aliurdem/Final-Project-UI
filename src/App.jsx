@@ -20,6 +20,8 @@ import AppBar from './components/HomePage/AppBar';
 import { GoogleMapsProvider } from './components/HomePage/GoogleMapProvider';
 import MyRoutes from './pages/MyRoutes';
 import EditRoutes from './pages/EditRoute';
+import CategoryManagment from './pages/CategoryManagment';
+
 
 const { Content } = Layout;
 
@@ -60,6 +62,7 @@ const LayoutWithAppBar = () => {
           <Route path="/my-routes" element={<MyRoutes />} />
           <Route path="/places" element={<Places />} />
           <Route path='/new-places' element={<NewPlaces />}></Route>
+          <Route path='/category-managment' element={<CategoryManagment />}></Route>
           <Route path="/denied" element={<AccessDenied />} />
         </Routes>
       </Content>

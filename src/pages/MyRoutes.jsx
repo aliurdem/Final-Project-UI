@@ -37,6 +37,7 @@ const MyRoutes = () => {
       setRoutes([]);
     }
   };
+  
 
   const handleDelete = (routeId) => {
     Modal.confirm({
@@ -150,24 +151,33 @@ const MyRoutes = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f4f4f4' }}>
-      <Header style={{ background: '#493628', padding: '0 16px' }}>
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/')}
-          style={{ color: '#fff', backgroundColor: '#AB886D', border: 'none' }}
-        >
-          Geri
-        </Button>
-        {isLoggedIn && (
-          <Button
-            onClick={() => navigate('/new-routes')}
-            style={{ color: '#fff', backgroundColor: '#4CAF50', border: 'none' }}
-          >
-            Yeni Rota Oluştur
-          </Button>
-        )}
-        <div style={{ color: '#fff', fontSize: '24px', fontWeight: 'bold' }}>Gezi Rotalarımız</div>
-      </Header>
+      <Header style={{ background: '#493628', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+  <div>
+  </div>
+  <div style={{ color: '#fff', fontSize: '24px', fontWeight: 'bold' }}> <h1
+      style={{
+        color: '#fff',
+        fontSize: '28px',
+        margin: 0,
+        fontFamily: 'Lobster, sans-serif',
+      }}
+    >
+      Rotalarım
+    </h1></div>
+  {isLoggedIn && (
+    <Button
+      onClick={() => navigate('/new-routes')}
+      type="primary"
+      style={{
+        color: '#fff',
+        border: 'none',
+        marginLeft: 'auto',
+      }}
+    >
+      Yeni Rota Oluştur
+    </Button>
+  )}
+</Header>
       <div style={{ padding: '20px' }}>
         <Row gutter={[16, 16]}>
           {routes.map((route) => (

@@ -1,0 +1,24 @@
+.category-management {
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .custom-table {
+    max-width: 100%;
+  }
+  
+  .custom-table .ant-table-container {
+    max-height: 400px;
+    overflow: auto;
+  }
+  
+  .action-buttons button {
+    margin-right: 8px;
+  }
+  

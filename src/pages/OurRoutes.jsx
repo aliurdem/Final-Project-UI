@@ -5,6 +5,7 @@ import { GoogleMap, DirectionsRenderer,MarkerF } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../components/HomePage/UserContext';
 import './ourRoutes.css';
+import { Pagination } from 'antd';
 
 const { Header } = Layout;
 
@@ -17,22 +18,99 @@ const OurRoutes = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { isLoggedIn } = useContext(UserContext);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10); // Sayfa başına gösterilecek rota sayısı
+  const [filters, setFilters] = useState([]);
+  const [totalPages, setTotalPages] = useState(0); // Toplam sayfa sayısı
+  const [totalRecords, setTotalRecords] = useState(0); // Toplam kayıt sayısı
 
-  const fetchAllRoutes = async () => {
+
+
+useEffect(() => {
+  console.log('Current Page Changed:', currentPage);
+  fetchAllRoutes();
+}, [currentPage, pageSize, filters]);
+
+useEffect(() => {
+  fetchAllRoutes(); // Pagination veya filtre değiştiğinde çalışır.
+}, [currentPage, pageSize, filters]);
+
+useEffect(() => {
+  const fetchCategories = async () => {
     try {
-      const response = await fetch('https://localhost:7263/TravelRoute/GetAll');
+      const response = await fetch('https://localhost:7263/Category/GetAll');
       const result = await response.json();
       if (result.success) {
-        setRoutes(result.data);
+        setCategories(result.data);
       } else {
-        console.error('Rotalar alınırken hata oluştu:', result.message);
-        setRoutes([]);
+        console.error('Kategoriler alınırken hata oluştu:', result.message);
       }
     } catch (error) {
-      console.error('Rotalar alınırken hata oluştu:', error);
-      setRoutes([]);
+      console.error('Kategoriler alınırken hata oluştu:', error);
     }
   };
+
+  fetchCategories();
+  fetchAllRoutes();
+}, []);
+
+const fetchAllRoutes = async () => {
+  setLoading(true);
+
+  try {
+    // Query parametrelerini oluştur
+    const queryParams = new URLSearchParams({
+      PageNumber: currentPage,
+      PageSize: pageSize,
+    });
+
+    // Filtre verilerini uygun formata dönüştür
+    const formattedFilters = filters.map((filter) => ({
+      ...filter,
+      value: filter.value.toString(),
+    }));
+
+    // API'ye istek yap
+    const response = await fetch(`https://localhost:7263/TravelRoute/GetList?${queryParams}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filters: formattedFilters }),
+    });
+
+    // Yanıt kontrolü
+    if (!response.ok) {
+      console.error("API Hatası:", response.status);
+      setRoutes([]);
+      return;
+    }
+
+    // Pagination bilgilerini oku
+    const paginationHeader = response.headers.get('X-Pagination');
+    if (paginationHeader) {
+      try {
+        const paginationData = JSON.parse(paginationHeader);
+        console.log('Pagination Header:', paginationData);
+
+        // Pagination bilgilerini state'e ata
+        setTotalPages(paginationData.TotalPages || 1);
+        setTotalRecords(paginationData.TotalCount || 0);
+      } catch (err) {
+        console.error("Pagination Header JSON parse hatası:", err);
+      }
+    } else {
+      console.warn("X-Pagination başlığı bulunamadı.");
+    }
+
+    // Gövde verisini işle
+    const data = await response.json();
+    setRoutes(data);
+  } catch (error) {
+    console.error("API çağrısı sırasında hata:", error);
+    setRoutes([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchRouteDetails = async (routeId) => {
     setLoading(true);
@@ -88,24 +166,7 @@ const OurRoutes = () => {
     );
   };
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('https://localhost:7263/Category/GetAll');
-        const result = await response.json();
-        if (result.success) {
-          setCategories(result.data);
-        } else {
-          console.error('Kategoriler alınırken hata oluştu:', result.message);
-        }
-      } catch (error) {
-        console.error('Kategoriler alınırken hata oluştu:', error);
-      }
-    };
 
-    fetchCategories();
-    fetchAllRoutes();
-  }, []);
 
   const handleCardClick = (routeId) => {
     setIsModalVisible(true);
@@ -120,8 +181,15 @@ const OurRoutes = () => {
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#f4f4f4' }}>
-      <Header style={{ background: '#493628', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      
+      <Header
+  style={{
+    background: '#493628',
+    padding: '0 16px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }}
+>
   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
     <h1
       style={{
@@ -133,6 +201,24 @@ const OurRoutes = () => {
     >
       Gezi Rotaları
     </h1>
+    <Select
+      placeholder="Kategori Seç"
+      onChange={(value) =>
+        setFilters(
+          value
+            ? [{ property: 'CategoryId', operator: '==', value }]
+            : [] // Boş değer seçilirse filtreyi temizle
+        )
+      }
+      style={{ width: 200 }}
+    >
+      <Select.Option value={null}>Tüm Kategoriler</Select.Option>
+      {categories.map((category) => (
+        <Select.Option key={category.id} value={category.id}>
+          {category.name}
+        </Select.Option>
+      ))}
+    </Select>
   </div>
   {isLoggedIn && (
     <Button
@@ -296,6 +382,26 @@ const OurRoutes = () => {
     )
   )}
 </Modal>
+{totalRecords > 0 && (
+  <Pagination
+    current={currentPage}
+    pageSize={pageSize}
+    total={totalRecords}
+    onChange={(page) => setCurrentPage(page)}
+    showSizeChanger={false}
+    style={{
+      position: 'fixed',
+      bottom: '20px',
+      right: '20px',
+      zIndex: 1000,
+      backgroundColor: '#fff',
+      padding: '10px',
+      borderRadius: '8px',
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+    }}
+  />
+)}
+
     </Layout>
   );
 };
