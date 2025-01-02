@@ -1,6 +1,4 @@
-/* SignUp.css */
 
-/* Sayfa boyunca margin ve padding sıfırlanır */
 *,
 *::before,
 *::after {
@@ -10,30 +8,30 @@
 }
 
 body, html {
-  height: 100%; /* Sayfa yüksekliğini %100 yaparak tam ekran */
-  width: 100%; /* Sayfa genişliğini %100 yaparak tam ekran */
+  height: 100%;
+  width: 100%; 
 }
 
 .signup-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5e5d7; /* Arka plan rengini eşleştir */
+  background-color: #f5e5d7; 
   padding: 40px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 800px; /* Genişliği ihtiyaca göre ayarlayın */
+  max-width: 800px; 
   width: 100%;
-  height: 100%; /* Sayfa yüksekliğine tam uysun */
-  position: fixed; /* Sayfa boyunca sabit kalması için fixed */
+  height: 100%; 
+  position: fixed; 
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Sayfa içeriğini tam ortalayacak */
+  transform: translate(-50%, -50%); 
 }
 
 .signup-container {
   flex: 1;
-  padding-right: 20px; /* Form ve resim arasındaki boşluk */
+  padding-right: 20px; 
 }
 
 .image-container {
@@ -44,23 +42,22 @@ body, html {
 
 .signup-image {
   width: 100%;
-  max-width: 300px; /* Görselin boyutunu sınırlayın */
+  max-width: 300px; 
   height: auto;
 }
 
 .icon {
-  width: 24px; /* İkon boyutunu ayarlayın */
+  width: 24px;
   height: 24px;
   position: absolute;
 }
 
 .icon {
-  width: 24px; /* İkon boyutunu ayarlayın */
+  width: 24px; 
   height: 24px;
   position: absolute;
 }
 
-/* Her ikon için konumlandırma */
 .icon-top-left {
   top: 10px;
   left: 10px;
@@ -83,7 +80,7 @@ body, html {
 
 
 .title {
-  color: #0f2e49; /* Koyu mavi renk */
+  color: #0f2e49;
   font-size: 24px;
   margin-bottom: 20px;
   font-weight: bold;
@@ -111,7 +108,7 @@ body, html {
   font-size: 16px;
   font-weight: bold;
   color: #ffffff;
-  background-color: #0f2e49; /* Koyu mavi renk */
+  background-color: #0f2e49;
   border: none;
   border-radius: 4px;
   cursor: pointer;

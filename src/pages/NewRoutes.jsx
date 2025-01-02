@@ -8,7 +8,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DeleteOutlined } from '@ant-design/icons';
 import { LeftOutlined } from '@ant-design/icons';
 import { RightOutlined  } from '@ant-design/icons';
-import logo from '/edirnelogorenkli.png'; // Placeholder image
+import logo from '/edirnelogorenkli.png'; 
 import { GoogleMap, DirectionsRenderer,MarkerF } from '@react-google-maps/api';
 import { HeartFilled, HeartOutlined } from '@ant-design/icons';
 
@@ -58,23 +58,23 @@ const NewRoutes = () => {
   };
 
   const calculateRoute = async () => {
-    setDirectionsResponse(null); // Eski rotayı temizle
-    setLoading(true); // Yükleniyor durumuna geç
+    setDirectionsResponse(null); 
+    setLoading(true); 
   
     if (!window.google || !window.google.maps) {
       message.error('Google Maps API yüklenemedi.');
-      setLoading(false); // Yükleme durumunu sonlandır
+      setLoading(false); 
       return;
     }
   
     if (selectedPlaces.length < 2) {
       message.warning('Rota oluşturmak için en az 2 yer seçmelisiniz.');
-      setLoading(false); // Yükleme durumunu sonlandır
+      setLoading(false); 
       return;
     }
   
     const directionsService = new window.google.maps.DirectionsService();
-    const sortedPlaces = [...selectedPlaces]; // Güncel listeyi kullan
+    const sortedPlaces = [...selectedPlaces]; 
   
     const origin = {
       lat: sortedPlaces[0].latitude,
@@ -101,26 +101,26 @@ const NewRoutes = () => {
         },
         (result, status) => {
           if (status === window.google.maps.DirectionsStatus.OK) {
-            setDirectionsResponse(result); // Yeni rota sonuçları
+            setDirectionsResponse(result);
           } else {
             message.error('Rota hesaplanırken bir hata oluştu.');
           }
-          setLoading(false); // Yükleme tamamlandı
+          setLoading(false);
         }
       );
     } catch (error) {
       console.error('Rota hesaplama hatası:', error);
       message.error('Rota hesaplanırken bir hata oluştu.');
-      setLoading(false); // Yükleme tamamlandı
+      setLoading(false); 
     }
   };
   
   const handlePlaceSelection = (place) => {
     setSelectedPlaces((prev) => {
       if (prev.some((p) => p.id === place.id)) {
-        return prev.filter((p) => p.id !== place.id); // Çıkar
+        return prev.filter((p) => p.id !== place.id); 
       } else {
-        return [...prev, place]; // Ekle
+        return [...prev, place]; 
       }
     });
   };
@@ -221,7 +221,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
     const updatedList = [...selectedPlaces];
     const [movedItem] = updatedList.splice(fromIndex, 1);
     updatedList.splice(toIndex, 0, movedItem);
-    setSelectedPlaces(updatedList); // Güncel listeyi sakla
+    setSelectedPlaces(updatedList); 
   };
 
   const handleRemovePlace = (placeId) => {
@@ -280,28 +280,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
 
   return (
     <div>
-      {/* <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
-        <video autoPlay muted loop style={{ width: '100%', objectFit: 'cover' }}>
-          <source src="/yenirota.mp4" type="video/mp4" />
-          Tarayıcınız video etiketini desteklemiyor.
-        </video>
-
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/our-routes')}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            left: '16px',
-            zIndex: 10,
-            backgroundColor: '#3C2A21',
-            color: 'white',
-            border: 'none',
-          }}
-        >
-          Geri
-        </Button>
-      </div> */}
+      
 
       <div style={{ padding: '24px' }}>
         <Title level={2} style={{ textAlign: 'center', color: '#3C2A21', fontFamily: 'Lobster, sans-serif' }}>
@@ -309,7 +288,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
         </Title>
         <Row gutter={[16, 16]} align="stretch">
   <Col span={12}>
-    <Card style={{ height: '100%' }}> {/* Kart yüksekliği tüm Col'ü kaplar */}
+    <Card style={{ height: '100%' }}> 
       <Row gutter={[16, 16]}>
         <Col span={24}>
           <Title level={4}>Rota İsmi</Title>
@@ -330,7 +309,7 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
           width: '200px',
           height: '200px',
           marginTop: '16px',
-          backgroundColor: '#f5f5f5', // Açık beyaz arka plan
+          backgroundColor: '#f5f5f5', 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -437,8 +416,8 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
           scrollBehavior: 'smooth',
           borderBottom: '2px solid #ddd',
           whiteSpace: 'nowrap',
-          maxHeight: '400px', // Sabit yükseklik
-          overflowY: 'auto', // Yatay kaydırmayı kaldırdık, dikey kaydırma eklendi
+          maxHeight: '400px', 
+          overflowY: 'auto', 
         }}
         onWheel={(e) => {
           e.preventDefault();
@@ -462,10 +441,10 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
       style={{
         textAlign: 'center',
         cursor: 'pointer',
-        border: selectedPlaces.some((p) => p.id === place.id) // Burayı değiştirdik
+        border: selectedPlaces.some((p) => p.id === place.id) 
         ? '2px solid #3C2A21'
         : '1px solid #d9d9d9',
-      boxShadow: selectedPlaces.some((p) => p.id === place.id) // Burayı değiştirdik
+      boxShadow: selectedPlaces.some((p) => p.id === place.id) 
         ? '0 4px 8px rgba(0, 0, 0, 0.2)'
         : '0 2px 4px rgba(0, 0, 0, 0.1)',
         backgroundColor: '#ffffff',
@@ -551,8 +530,8 @@ const DraggableListItem = ({ place, index, movePlace, removePlace }) => {
       height: '100%',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
       borderRadius: '12px',
-      maxHeight: '400px', // Kart yüksekliği sabit
-      overflow: 'hidden', // Taşma durumunda sadece içerik alanı kontrolü
+      maxHeight: '400px', 
+      overflow: 'hidden', 
     }}
   >
     <Row gutter={[16, 16]} align="stretch">

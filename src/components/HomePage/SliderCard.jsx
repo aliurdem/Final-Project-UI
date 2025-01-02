@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, message } from 'antd';
 import axios from 'axios';
-import logo from '/edirnelogorenkli.png'; // Placeholder image
+import logo from '/edirnelogorenkli.png'; 
 import { HeartOutlined, HeartFilled } from '@ant-design/icons';
 import { GoogleMap, MarkerF } from '@react-google-maps/api';
 
@@ -20,7 +20,6 @@ const SliderCard = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isFav, setIsFav] = useState(checkIfFav(placeId));
 
-  // Favori kontrol fonksiyonu
   function checkIfFav(placeId) {
     const favList = JSON.parse(localStorage.getItem('userFavList')) || [];
     return favList.some((fav) => fav.placeId === placeId);
@@ -173,7 +172,6 @@ const SliderCard = ({
   );
 };
 
-// CSS stilleri
 const cardStyle = {
   border: '1px solid #ddd',
   borderRadius: '8px',

@@ -17,15 +17,15 @@ const SearchBox = () => {
         enterButton={
           <Button
             style={{
-              background: 'linear-gradient(45deg, #493628, #6f4f32)', // Gradient buton arka planı
+              background: 'linear-gradient(45deg, #493628, #6f4f32)', 
               color: 'white',
               borderColor: '#493628',
-              borderRadius: '20px', // Yuvarlak buton
+              borderRadius: '20px', 
               fontWeight: 'bold',
               transition: 'transform 0.3s ease',
               marginLeft: '10px',
             }}
-            onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'} // Hover etkisi
+            onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'} 
             onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
           >
             ARA
@@ -35,11 +35,11 @@ const SearchBox = () => {
           width: '80%',
           maxWidth: '800px',
           backgroundColor: '#493628',
-          borderRadius: '50px', // Yuvarlak köşeler
+          borderRadius: '50px', 
           padding: '10px 20px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Yumuşak gölge efekti
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
         }}
-        prefix={<SearchOutlined style={{ color: '#493628', fontSize: '20px' }} />} // Büyüteç ikonu ekleniyor
+        prefix={<SearchOutlined style={{ color: '#493628', fontSize: '20px' }} />} 
         className="custom-input"
       />
     </div>

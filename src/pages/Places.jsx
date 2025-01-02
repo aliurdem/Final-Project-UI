@@ -156,7 +156,7 @@ const Places = () => {
       : 'https://localhost:7263/Place';
     const method = isEditMode ? 'patch' : 'post';
   
-    let imageData = selectedPlace?.imageData || ''; // Mevcut imageData'yı kullan
+    let imageData = selectedPlace?.imageData || ''; 
   
     if (file) {
       try {
@@ -179,14 +179,14 @@ const Places = () => {
         {
           ...values,
           id: selectedPlace?.id || 0,
-          imageData, // Güncel veya mevcut imageData
+          imageData, 
         },
         { withCredentials: true }
       );
   
       if (response.status === 200 || response.status === 201) {
         message.success(`Yer başarıyla ${isEditMode ? 'güncellendi' : 'oluşturuldu'}!`);
-        await fetchPlaces(); // Listeyi yeniden çek
+        await fetchPlaces();
         closeModal();
       }
     } catch (error) {

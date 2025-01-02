@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // useNavigate import edildi
+import { useNavigate } from 'react-router-dom'; 
 import './AdminPanel.css';
 
 const AdminPanel = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
-  const navigate = useNavigate(); // useNavigate kullanımı
+  const navigate = useNavigate(); 
 
   const handlePasswordChange = () => {
     console.log('Changing password to:', newPassword);
@@ -37,7 +37,7 @@ const AdminPanel = () => {
             border: 'none',
             cursor: 'pointer',
             fontSize: '20px',
-            color: 'black',  // Geri tuşunun rengini siyah yapıyoruz
+            color: 'black', 
           }}>←</button>
           <span className="username" style={{
             fontWeight: 'bold',
@@ -58,26 +58,24 @@ const AdminPanel = () => {
         gridTemplateColumns: 'repeat(2, 1fr)',
         gridGap: '16px',
       }}>
-        {/* Favori Yerler Kutusu */}
         <div
           className="box"
-          onClick={() => navigate('/favorites')} // Burada yönlendirme yapılıyor
+          onClick={() => navigate('/favorites')} 
           style={{
             backgroundImage: 'url("/foto1.png")',
-            backgroundSize: 'cover', // Resmi kutuya sığdırır.
-            backgroundPosition: 'center', // Resmin ortalanmasını sağlar.
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center',
             padding: '16px',
             borderRadius: '4px',
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-            cursor: 'pointer', // Tıklanabilir olduğunu belli etmek için cursor pointer
-            color: '#fff', // Yazı rengini okunaklı hale getirmek için beyaz yaptık.
-            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)', // Yazının daha belirgin olması için gölge ekledik.
+            cursor: 'pointer', 
+            color: '#fff',
+            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)', 
           }}
         >
           ❤️ Favori Yerler
         </div>
 
-        {/* Kaydedilen Rotalar Kutusu */}
         <div
           className="box"
           onClick={() => navigate('/saved-routes')}
@@ -96,7 +94,6 @@ const AdminPanel = () => {
           🔖 Kaydedilen Rotalar
         </div>
 
-        {/* Profil Ayarları Kutusu */}
         <div
           className="box"
           onClick={() => navigate('/profile-settings')}
@@ -115,7 +112,6 @@ const AdminPanel = () => {
           ⚙️ Profil Ayarları
         </div>
 
-        {/* Yardım Kutusu */}
         <div
           className="box"
           onClick={() => navigate('/help')}

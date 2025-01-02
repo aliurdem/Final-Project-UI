@@ -96,11 +96,10 @@ const CategoryManagement = () => {
   const handleSubmit = async (values) => {
     try {
       if (isEditing) {
-        // PATCH isteği ile güncelleme
         await axios.patch(
           `https://localhost:7263/Category`,
           {
-            id: editingCategory.id, // Sunucuya ID ve yeni adı gönderiyoruz
+            id: editingCategory.id, 
             name: values.name,
           },
           {
@@ -109,11 +108,10 @@ const CategoryManagement = () => {
         );
         message.success('Kategori başarıyla güncellendi.');
       } else {
-        // POST isteği ile yeni kategori ekleme
         await axios.post(
           `https://localhost:7263/Category`,
           {
-            id: 0, // Yeni kategori için ID genellikle sıfır gönderilir
+            id: 0, 
             name: values.name,
           },
           {
@@ -123,7 +121,7 @@ const CategoryManagement = () => {
         message.success('Kategori başarıyla eklendi.');
       }
       setIsModalVisible(false);
-      fetchCategories(pagination.currentPage, pagination.pageSize); // Listeyi yenile
+      fetchCategories(pagination.currentPage, pagination.pageSize); 
     } catch (error) {
       console.error('İşlem hatası:', error);
       message.error('İşlem sırasında bir hata oluştu.');
@@ -203,7 +201,7 @@ const CategoryManagement = () => {
     </h1>
     <Button
   type="primary"
-  onClick={handleAdd} // onClick doğrudan handleAdd fonksiyonunu çağırmalı
+  onClick={handleAdd}
   style={{
     color: '#fff',
     border: 'none',

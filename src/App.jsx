@@ -25,19 +25,16 @@ import CategoryManagment from './pages/CategoryManagment';
 
 const { Content } = Layout;
 
-// Yeni bir bileşen oluşturuyoruz
 const LayoutWithAppBar = () => {
   const location = useLocation();
 
-  // AppBar'ın gösterilmeyeceği sayfaların yolları
   const hiddenPaths = ['/login', '/signup'];
 
-  // Eğer mevcut yol bu listede varsa AppBar render edilmez
   const hideAppBar = hiddenPaths.includes(location.pathname);
 
   return (
     <Layout>
-      {!hideAppBar && <AppBar />} {/* Koşullu AppBar */}
+      {!hideAppBar && <AppBar />} 
       <Content>
         <Routes>
          <Route

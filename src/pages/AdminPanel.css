@@ -18,7 +18,7 @@
   .admin-panel .header .settings-icon {
     cursor: pointer;
     font-size: 20px;
-    margin-left: 1260px; /* Ayarlar butonu sağa taşındı */
+    margin-left: 1260px; 
   }
   
   .admin-panel .sidebar {
@@ -36,7 +36,7 @@
   }
   
   .admin-panel .sidebar .menu-item:not(:last-child) {
-    margin-bottom: 990px; /* Menü elemanları arasında daha geniş boşluk */
+    margin-bottom: 990px;
   }
   
   .admin-panel .content {

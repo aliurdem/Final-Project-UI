@@ -3,7 +3,7 @@ import { Row, Col, Card, Button, Typography, Input, InputNumber, Upload, message
 import { UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import logo from '/edirnelogorenkli.png'; // Placeholder image
+import logo from '/edirnelogorenkli.png'; 
 
 const { Title } = Typography;
 
@@ -18,7 +18,6 @@ const NewPlace = () => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Axios yapılandırması
   axios.defaults.withCredentials = true;
 
   const handleImageUpload = (file) => {

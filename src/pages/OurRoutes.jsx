@@ -19,10 +19,10 @@ const OurRoutes = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10); // Sayfa başına gösterilecek rota sayısı
+  const [pageSize] = useState(10); 
   const [filters, setFilters] = useState([]);
-  const [totalPages, setTotalPages] = useState(0); // Toplam sayfa sayısı
-  const [totalRecords, setTotalRecords] = useState(0); // Toplam kayıt sayısı
+  const [totalPages, setTotalPages] = useState(0); 
+  const [totalRecords, setTotalRecords] = useState(0); 
 
 
 
@@ -32,7 +32,7 @@ useEffect(() => {
 }, [currentPage, pageSize, filters]);
 
 useEffect(() => {
-  fetchAllRoutes(); // Pagination veya filtre değiştiğinde çalışır.
+  fetchAllRoutes(); 
 }, [currentPage, pageSize, filters]);
 
 useEffect(() => {
@@ -58,40 +58,34 @@ const fetchAllRoutes = async () => {
   setLoading(true);
 
   try {
-    // Query parametrelerini oluştur
     const queryParams = new URLSearchParams({
       PageNumber: currentPage,
       PageSize: pageSize,
     });
 
-    // Filtre verilerini uygun formata dönüştür
     const formattedFilters = filters.map((filter) => ({
       ...filter,
       value: filter.value.toString(),
     }));
 
-    // API'ye istek yap
     const response = await fetch(`https://localhost:7263/TravelRoute/GetList?${queryParams}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ filters: formattedFilters }),
     });
 
-    // Yanıt kontrolü
     if (!response.ok) {
       console.error("API Hatası:", response.status);
       setRoutes([]);
       return;
     }
 
-    // Pagination bilgilerini oku
     const paginationHeader = response.headers.get('X-Pagination');
     if (paginationHeader) {
       try {
         const paginationData = JSON.parse(paginationHeader);
         console.log('Pagination Header:', paginationData);
 
-        // Pagination bilgilerini state'e ata
         setTotalPages(paginationData.TotalPages || 1);
         setTotalRecords(paginationData.TotalCount || 0);
       } catch (err) {
@@ -101,7 +95,6 @@ const fetchAllRoutes = async () => {
       console.warn("X-Pagination başlığı bulunamadı.");
     }
 
-    // Gövde verisini işle
     const data = await response.json();
     setRoutes(data);
   } catch (error) {
@@ -207,7 +200,7 @@ const fetchAllRoutes = async () => {
         setFilters(
           value
             ? [{ property: 'CategoryId', operator: '==', value }]
-            : [] // Boş değer seçilirse filtreyi temizle
+            : [] 
         )
       }
       style={{ width: 200 }}
@@ -262,7 +255,7 @@ const fetchAllRoutes = async () => {
   onCancel={handleModalClose}
   footer={null}
   width="80%"
-  centered // Modalı ekranda ortalar
+  centered 
   bodyStyle={{
     padding: '20px',
     backgroundColor: '#f9f9f9',

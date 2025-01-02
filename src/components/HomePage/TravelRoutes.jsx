@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Link bileşenini import edin
+import { Link } from 'react-router-dom'; 
 import './TravelRoutes.css';
 
 const TravelRoutes = () => {
@@ -8,30 +8,29 @@ const TravelRoutes = () => {
       <div className="route-left">
         {/* Video öğesi */}
         <video
-          src="rota1.mp4" // Videonuzun yolu
+          src="rota1.mp4" 
           autoPlay
           loop
           muted
           playsInline
-          className="main-video" // Videonun stilini tanımlamak için class ekledik
+          className="main-video" 
         ></video>
       </div>
       <div className="route-right">
-        {/* Link bileşenini h2 etrafına ekleyin */}
+        {}
         <Link 
   to="/our-routes" 
   style={{ 
     textDecoration: 'none', 
     color: '#493628', 
-    fontFamily: 'Charmonman, serif', // Yazı tipi eklendi
-    marginLeft: '30px' // Yazıyı sola kaydır
+    fontFamily: 'Charmonman, serif', 
+    marginLeft: '30px' 
   }}
 >
   <h2>Edirne İçin Gezi Rotaları</h2>
 </Link>
 
         <div className="route-images">
-          {/* Rotanın altındaki içerikler */}
           <div className="route-card">
             <p className="route-title">Yemek Rotası</p>
             <img src="rota2.png" alt="Yemek Rotası" className="route-image" />

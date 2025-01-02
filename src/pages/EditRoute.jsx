@@ -307,28 +307,6 @@ useEffect(() => {
 
   return (
     <div>
-      {/* <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
-        <video autoPlay muted loop style={{ width: '100%', objectFit: 'cover' }}>
-          <source src="/yenirota.mp4" type="video/mp4" />
-          Tarayıcınız video etiketini desteklemiyor.
-        </video>
-
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/our-routes')}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            left: '16px',
-            zIndex: 10,
-            backgroundColor: '#3C2A21',
-            color: 'white',
-            border: 'none',
-          }}
-        >
-          Geri
-        </Button>
-      </div> */}
 
       <div style={{ padding: '24px' }}>
         <Title level={2} style={{ textAlign: 'center', color: '#3C2A21', fontFamily: 'Lobster, sans-serif' }}>
@@ -336,7 +314,7 @@ useEffect(() => {
         </Title>
         <Row gutter={[16, 16]} align="stretch">
   <Col span={12}>
-    <Card style={{ height: '100%' }}> {/* Kart yüksekliği tüm Col'ü kaplar */}
+    <Card style={{ height: '100%' }}> 
       <Row gutter={[16, 16]}>
         <Col span={24}>
           <Title level={4}>Rota İsmi</Title>
@@ -464,8 +442,8 @@ useEffect(() => {
           scrollBehavior: 'smooth',
           borderBottom: '2px solid #ddd',
           whiteSpace: 'nowrap',
-          maxHeight: '400px', // Sabit yükseklik
-          overflowY: 'auto', // Yatay kaydırmayı kaldırdık, dikey kaydırma eklendi
+          maxHeight: '400px', 
+          overflowY: 'auto', 
         }}
         onWheel={(e) => {
           e.preventDefault();
@@ -489,10 +467,10 @@ useEffect(() => {
       style={{
         textAlign: 'center',
         cursor: 'pointer',
-        border: selectedPlaces.some((p) => p.id === place.id) // Burayı değiştirdik
+        border: selectedPlaces.some((p) => p.id === place.id) 
         ? '2px solid #3C2A21'
         : '1px solid #d9d9d9',
-      boxShadow: selectedPlaces.some((p) => p.id === place.id) // Burayı değiştirdik
+      boxShadow: selectedPlaces.some((p) => p.id === place.id) 
         ? '0 4px 8px rgba(0, 0, 0, 0.2)'
         : '0 2px 4px rgba(0, 0, 0, 0.1)',
         backgroundColor: '#ffffff',
@@ -578,8 +556,8 @@ useEffect(() => {
       height: '100%',
       boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
       borderRadius: '12px',
-      maxHeight: '400px', // Kart yüksekliği sabit
-      overflow: 'hidden', // Taşma durumunda sadece içerik alanı kontrolü
+      maxHeight: '400px', 
+      overflow: 'hidden', 
     }}
   >
     <Row gutter={[16, 16]} align="stretch">

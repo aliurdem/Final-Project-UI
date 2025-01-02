@@ -1,20 +1,18 @@
 import React from 'react';
-import { Button } from 'antd'; // Ant Design Button import edildi
-import { useNavigate } from 'react-router-dom'; // useNavigate kullanarak yönlendirme
+import { Button } from 'antd'; 
+import { useNavigate } from 'react-router-dom'; 
 import './AboutUs.css';
 
 const AboutUs = () => {
-  const navigate = useNavigate(); // useNavigate hook ile yönlendirme
+  const navigate = useNavigate(); 
 
   const goHome = () => {
-    navigate('/'); // Anasayfaya yönlendirme
+    navigate('/'); 
   };
 
   return (
     <div className="about-us-container">
-      {/* Sol taraf */}
       <div className="about-us-left">
-        {/* Geri butonu */}
         <Button 
           type="primary" 
           onClick={goHome} 
@@ -24,7 +22,6 @@ const AboutUs = () => {
 
         <h1>HAKKIMIZDA</h1>
 
-        {/* Profil 1 */}
         <div className="profile">
           <img src="./about1.png" alt="Profil 1" className="profile-image" />
           <div className="profile-info">
@@ -40,7 +37,6 @@ const AboutUs = () => {
           </div>
         </div>
 
-        {/* Profil 2 */}
         <div className="profile">
           <img src="./about2.png" alt="Profil 2" className="profile-image" />
           <div className="profile-info">
@@ -57,7 +53,6 @@ const AboutUs = () => {
         </div>
       </div>
 
-      {/* Sağ taraf */}
       <div className="about-us-right">
         <img src="./about.png" alt="Hakkımızda Görseli" className="about-image" />
       </div>

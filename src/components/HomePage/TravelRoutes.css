@@ -1,7 +1,7 @@
 .travel-routes {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* Üst hizalamak için */
+  align-items: flex-start; 
   padding: 20px;
   background-color: #AB886D;
 }
@@ -14,19 +14,19 @@
 
 .route-right {
   flex: 1;
-  padding-left: 20px; /* Sağdaki grubun sola kayması için azaltıldı */
-  margin-top: -20px; /* Grubu biraz yukarı çekmek için eklendi */
+  padding-left: 20px; 
+  margin-top: -20px; 
 }
 
 .route-right h2 {
   font-size: 2rem;
-  margin-bottom: 10px; /* Başlığın görsellere yaklaşması için azaltıldı */
+  margin-bottom: 10px; 
 }
 
 .route-images {
   display: flex;
   gap: 20px;
-  justify-content: flex-start; /* Görselleri biraz sola kaydırmak için */
+  justify-content: flex-start; 
 }
 
 .route-card {
@@ -53,10 +53,10 @@
   border-radius: 8px;
 }
 .main-video {
-  width: 100%; /* Videoyu tam genişlikte gösterir */
-  height: auto; /* Oranını korur */
-  border-radius: 8px; /* İsteğe bağlı: Kenarları yuvarlatır */
-  object-fit: cover; /* Video oranını koruyarak kapsayıcıya sığdırır */
-  margin-top: 55px; /* Videoyu aşağıya almak için üst boşluk ekleyin */
+  width: 100%; 
+  height: auto; 
+  border-radius: 8px; 
+  object-fit: cover; 
+  margin-top: 55px; 
 
 }

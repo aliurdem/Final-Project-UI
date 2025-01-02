@@ -20,7 +20,7 @@ const CommonModal = ({
       footer={null}
       width={width}
       onCancel={onClose}
-      centered // Modal'ı dikey ve yatay olarak ortalamak için
+      centered 
       bodyStyle={{
         backgroundColor: '#F6EFE9',
         borderRadius: '15px',
@@ -28,7 +28,7 @@ const CommonModal = ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        maxHeight: '80vh', // Taşmayı önlemek için
+        maxHeight: '80vh',
         overflowY: 'auto',
         boxSizing: 'border-box',
         ...bodyStyle,
@@ -37,7 +37,6 @@ const CommonModal = ({
       {item && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center', width: '100%' }}>
           <div style={{ display: 'flex', gap: '15px', width: '100%', flexWrap: 'wrap' }}>
-            {/* Görsel ve Favori Butonu */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 1 250px' }}>
               <img
                 alt={item.name}

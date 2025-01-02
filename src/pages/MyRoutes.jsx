@@ -23,7 +23,7 @@ const MyRoutes = () => {
     try {
       const response = await fetch('https://localhost:7263/TravelRoute/GetListForUser', {
         method: 'GET',
-        credentials: 'include', // Include cookies in the request
+        credentials: 'include',
       });
       const result = await response.json();
       if (result && Array.isArray(result)) {
@@ -48,7 +48,7 @@ const MyRoutes = () => {
       onOk: async () => {
         try {
           const response = await axios.delete(`https://localhost:7263/TravelRoute/${routeId}`, {
-            withCredentials: true, // Kullanıcı kimlik doğrulama bilgilerini ekler
+            withCredentials: true, 
           });
   
           if (response.status === 200) {
@@ -192,7 +192,7 @@ const MyRoutes = () => {
             type="primary"
             icon={<EditOutlined />}
             onClick={(e) => {
-              e.stopPropagation(); // Propagation'ı durdur
+              e.stopPropagation(); 
               navigate(`/edit-route/${route.id}`);
             }}
             style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
@@ -202,7 +202,7 @@ const MyRoutes = () => {
             danger
             icon={<DeleteOutlined />}
             onClick={(e) => {
-              e.stopPropagation(); // Propagation'ı durdur
+              e.stopPropagation(); 
               handleDelete(route.id);
             }}
           />
@@ -238,7 +238,7 @@ const MyRoutes = () => {
   onCancel={handleModalClose}
   footer={null}
   width="80%"
-  centered // Modalı ekranda ortalar
+  centered 
   bodyStyle={{
     padding: '20px',
     backgroundColor: '#f9f9f9',
@@ -341,7 +341,6 @@ const MyRoutes = () => {
               <DirectionsRenderer directions={directionsResponse} />
             )}
 
-            {/* Marker ve Bilgi Pencereleri */}
             {directionsResponse &&
               directionsResponse.routes[0].legs.map((leg, index) => (
                 <MarkerF

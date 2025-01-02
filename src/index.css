@@ -1,11 +1,10 @@
-/* Global Reset and Box Sizing */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Root Variables and Styles */
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -21,16 +20,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Body, Root, and Full-Height Layout */
+
 body, html, #root {
   margin: 0;
   padding: 0;
   width: 100%;
   min-height: 100%;
-  overflow-x: hidden; /* Prevents horizontal scroll */
+  overflow-x: hidden; 
 }
 
-/* Hyperlink Styles */
 a {
   font-weight: 500;
   color: #646cff;
@@ -42,9 +40,8 @@ a:hover {
   color: #535bf2;
 }
 
-/* Typography */
 h1 {
-  font-size: 2.5rem; /* Adjusted for better scalability */
+  font-size: 2.5rem;
   line-height: 1.1;
 }
 
@@ -53,7 +50,6 @@ h2, h3, h4, h5, h6 {
   margin-bottom: 1rem;
 }
 
-/* Buttons */
 button {
   border-radius: 6px;
   border: 1px solid transparent;
@@ -78,14 +74,12 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* Ant Design Layout Fix */
 .ant-layout {
   margin: 0;
   width: 100%;
   overflow-x: hidden;
 }
 
-/* Responsive Adjustments */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
